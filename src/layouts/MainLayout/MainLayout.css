@@ -1,0 +1,23 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 230vh;
+}
+
+main {
+    height: 87vh;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: margin-right 0.3s ease;
+    margin-right: 0;
+    padding-bottom: 80px;
+    overflow-y: none;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 10px;
+  }
+}

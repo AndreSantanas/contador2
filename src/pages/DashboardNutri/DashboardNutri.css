@@ -1,0 +1,58 @@
+.dashboard-nutri-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+}
+
+.welcome-box {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  border-top: 5px solid #8B0000;
+}
+
+.welcome-icon {
+  font-size: 4rem; /* 64px */
+  color: #8B0000;
+}
+
+.welcome-box h1 {
+  margin-top: 15px;
+  font-size: 2rem;
+  color: #333;
+}
+
+.welcome-box p {
+  font-size: 1.1rem;
+  color: #555;
+  margin: 15px 0 30px 0;
+  line-height: 1.6;
+}
+
+.dashboard-button {
+  background-color: #8B0000; /* DÁ COR DE FUNDO AO BOTÃO */
+  color: white;             /* DÁ COR AO TEXTO DO BOTÃO */
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-button:hover {
+  background-color: #a33b3b;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-button:active {
+  transform: translateY(1px);
+}

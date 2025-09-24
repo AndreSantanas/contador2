@@ -1,0 +1,88 @@
+/* ========================================================= */
+/* ESTILOS GERAIS (APLICÁVEIS A AMBOS)                       */
+/* ========================================================= */
+.inicio-container {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.buttons-section {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  display: grid; /* Usamos grid para ambos */
+  gap: 25px;
+}
+
+.main-button {
+  background-color: #8B0000;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.main-button i {
+  font-size: 1.3rem;
+}
+
+.main-button:hover {
+  background-color: #a33b3b;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.main-button:active {
+  transform: translateY(1px);
+}
+
+/* ========================================================= */
+/* LAYOUT PADRÃO (INSPETORA)                                 */
+/* ========================================================= */
+.buttons-section {
+  grid-template-columns: repeat(2, 1fr); /* 2 colunas */
+  max-width: 800px;
+}
+
+
+/* ========================================================= */
+/* LAYOUT ESPECÍFICO (NUTRICIONISTA)                         */
+/* A classe .nutri-grid garante que isso NÃO afete a inspetora */
+/* ========================================================= */
+.buttons-section.nutri-grid {
+  grid-template-columns: repeat(2, 1fr); /* 2 colunas, como solicitado */
+  max-width: 900px; /* Um pouco mais largo para os 8 botões */
+  /* Como são 8 botões em 2 colunas, o grid criará 4 linhas automaticamente */
+}
+
+
+/* ========================================================= */
+/* RESPONSIVIDADE (APLICÁVEL A AMBOS)                        */
+/* ========================================================= */
+@media (max-width: 768px) {
+  .buttons-section {
+    grid-template-columns: 1fr; /* Em celulares, ambos terão 1 coluna */
+    padding: 25px;
+    gap: 15px;
+  }
+
+  .main-button {
+    font-size: 1rem;
+    padding: 15px;
+  }
+}

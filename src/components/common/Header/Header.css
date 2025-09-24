@@ -1,0 +1,106 @@
+.header {
+    width: 100%;
+    min-height: 11vh; /* altura mínima para responsividade */
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 100;
+    box-shadow: 7px 7px 7px #00000062;
+}
+
+
+.header-left {
+    background-color: #fff;
+    width: 20%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.header-right {
+    background-color: #c00;
+    width: 80%;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.setas {
+    position: absolute;
+    left: 16%;
+    height: 100%;
+    z-index: 2;
+}
+.header {
+    z-index: 99999; /* Muito acima */
+    position: relative;
+  }
+  
+.logo {
+    width: 220px;
+    height: auto;
+    z-index: 10;
+    margin-left: 2px;
+    position: relative;
+}
+
+.menu-hamburguer {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  width: 60px; 
+  height: 60px;
+  z-index: 9999;
+}
+
+
+/* ========================================================= */
+/* CSS DEFINITIVO PARA O ÍCONE E ANIMAÇÃO                    */
+/* ========================================================= */
+
+/* Alvo principal é o ID do ícone para garantir a aplicação do estilo */
+#iconeMenu {
+  font-size: 40px; 
+  color: white; 
+  display: inline-block; /* Garante que transformações funcionem */
+  transition: transform 0.3s ease-in-out; /* Animação suave */
+}
+
+/* Regra que aplica a rotação quando a classe 'girar' está presente NO ELEMENTO com o ID */
+#iconeMenu.girar {
+  transform: rotate(90deg); /* Gira o ícone em 90 graus */
+}
+/* Responsividade do Header */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 10px;
+    min-height: 60px;
+  }
+  .header-left { width: 45%; }
+  .header-right { width: 65%; }
+  .logo { width: 80px; margin-left: 0px; }
+  .setas { left: 20%; }
+  .menu-hamburguer {
+    right: 10px;
+    top: 10px;
+    width: auto;
+    height: auto;
+  }
+  .menu-hamburguer i { font-size: 35px; }
+  #notificacao-badge {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+    top: 12px;
+    right: 60px;
+  }
+}
