@@ -1,0 +1,168 @@
+.necessidades-container {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1100px;
+}
+
+.necessidades-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #8B0000;
+  padding-bottom: 15px;
+}
+
+.necessidades-header h1 {
+  font-size: 1.8rem;
+  color: #333;
+}
+
+/* NOVO LAYOUT DE GRID */
+.necessidades-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Duas colunas */
+  gap: 15px; /* Espaçamento entre os cards */
+  min-height: 100px; /* Altura mínima para não ficar estranho se vazio */
+  margin-bottom: 20px;
+}
+
+/* ESTILO DE CADA ITEM/CARD */
+.necessidade-card {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-left: 5px solid #8B0000; /* Destaque na lateral */
+  padding: 15px 20px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  word-break: break-word;
+    font-size: 20px;
+}
+
+.necessidade-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.necessidade-text {
+  color: #333;
+  font-weight: 500;
+  padding-right: 15px; /* Espaço para não encostar nos botões */
+}
+
+.full-width-message {
+  grid-column: 1 / -1; /* Ocupa as duas colunas */
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #6c757d;
+}
+
+/* BOTÕES DE AÇÃO DENTRO DO CARD */
+.actions-cell {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0; /* Impede que os botões encolham */
+}
+
+.necessidades-footer {
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* RESPONSIVIDADE: Em telas menores, volta para uma coluna */
+@media (max-width: 768px) {
+  .necessidades-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================================= */
+/* ESTILOS DE COMPONENTES REUTILIZADOS                       */
+/* ========================================================= */
+
+/* PAGINAÇÃO */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 5px;
+}
+
+.pagination-button {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #007bff;
+  border-radius: 4px;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+  cursor: default;
+}
+
+.pagination-button.disabled {
+  color: #6c757d;
+  cursor: not-allowed;
+  background-color: #e9ecef;
+}
+
+/* BOTÕES DE AÇÃO GERAIS */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+}
+
+.add-button {
+  background-color: #28a745;
+  gap: 8px;
+}
+.add-button:hover { background-color: #218838; }
+
+.back-button {
+  background-color: #333;
+  gap: 8px;
+}
+.back-button:hover { background-color: #555; }
+
+.edit-button, .delete-button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  width: 50px; /* Largura fixa para os botões de ícone */
+}
+.edit-button { background-color: #ffc107; color: #333;
+width: 59px; }
+.edit-button:hover { background-color: #e0a800; }
+.delete-button { background-color: #dc3545; 
+width: 59px;}
+.delete-button:hover { background-color: #c82333; }

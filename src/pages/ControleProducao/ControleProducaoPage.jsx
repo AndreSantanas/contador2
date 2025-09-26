@@ -5,6 +5,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { getProducao, addProducao, updateProducao, deleteProducao } from '../../services/api';
 import './ControleProducaoPage.css';
+import logo from '../../assets/img/logo.png'; 
 
 const ControleProducaoPage = () => {
   const [producao, setProducao] = useState([]);
@@ -36,6 +37,7 @@ const ControleProducaoPage = () => {
   const handleOpenModal = (item = null) => {
     Swal.fire({
       title: item ? 'Editar Item' : 'Adicionar Novo Item',
+      width: '700px',
       html: `
         <input id="swal-nome" class="swal2-input" placeholder="Nome do Alimento" value="${item ? item.nome_alimento : ''}">
         <input id="swal-data" type="date" class="swal2-input" value="${item ? item.data_alimento : new Date().toISOString().split('T')[0]}">
@@ -90,7 +92,7 @@ const ControleProducaoPage = () => {
           Swal.fire('Sucesso!', 'Operação realizada com sucesso!', 'success');
           fetchData();
         } catch (error) {
-            Swal.fire('Erro!', error.message || 'Não foi possível salvar o item.', 'error');
+          Swal.fire('Erro!', error.message || 'Não foi possível salvar o item.', 'error');
         }
       }
     });
@@ -103,7 +105,7 @@ const ControleProducaoPage = () => {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
       confirmButtonText: 'Sim, deletar!',
       cancelButtonText: 'Cancelar',
     }).then(async (result) => {
@@ -122,21 +124,74 @@ const ControleProducaoPage = () => {
 
   const handleDownloadPdf = () => {
     const doc = new jsPDF();
-    doc.text("Relatório de Controle de Produção", 14, 16);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const today = new Date().toLocaleDateString('pt-BR');
+
+    const tableData = producao.filter(item => 
+      item && typeof item.nome_alimento === 'string' && item.nome_alimento.toLowerCase().includes(searchTerm.toLowerCase())
+    ).map(item => [
+      item.nome_alimento,
+      new Date(item.data_alimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
+      item.quantidade_alimento,
+      item.medida_alimento,
+      item.pessoas_alimento,
+      item.sobra_limpa_alimento,
+      item.desperdicio_alimento,
+    ]);
+
     autoTable(doc, {
       head: [['Nome', 'Data', 'Qtd.', 'Medida', 'Pessoas', 'Sobra', 'Desperdício']],
-      body: filteredData.map(item => [
-        item.nome_alimento,
-        new Date(item.data_alimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
-        item.quantidade_alimento,
-        item.medida_alimento,
-        item.pessoas_alimento,
-        item.sobra_limpa_alimento,
-        item.desperdicio_alimento,
-      ]),
-      startY: 20,
+      body: tableData,
+      startY: 35,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [139, 0, 0], // #8B0000
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+      },
+      alternateRowStyles: {
+        fillColor: [248, 249, 250]
+      },
+      didDrawPage: function (data) {
+        // CABEÇALHO PERFEITO: Título à Esquerda, Logo à Direita
+        const margin = 15;
+        const logoWidth = 40;
+        const logoHeight = 10;
+        
+        // Posição Y central para ambos os elementos
+        const verticalCenter = 20;
+
+        // Título do Relatório (à esquerda)
+        doc.setFontSize(20);
+        doc.setTextColor(51, 51, 51);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Controle de Produção e Consumo', margin, verticalCenter, { baseline: 'bottom' });
+        
+        // Logo (à direita)
+        const logoX = pageWidth - margin - logoWidth;
+        const logoY = verticalCenter - logoHeight; // Calcula a posição Y da logo
+        doc.addImage(logo, 'PNG', logoX, logoY, logoWidth, logoHeight);
+        
+        // Linha divisória
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.5);
+        doc.line(margin, verticalCenter + 5, pageWidth - margin, verticalCenter + 5);
+
+
+        // RODAPÉ PROFISSIONAL E LIMPO (VERSÃO FINAL)
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.setFont('helvetica', 'normal');
+
+        doc.text('Menu Solutions', margin, pageHeight - 10);
+        doc.text(`Emitido em: ${today}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+        doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+      },
     });
-    doc.save(`relatorio_producao_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
+
+    doc.save(`Controle_Producao_${today.replace(/\//g, '-')}.pdf`);
   };
 
   const filteredData = producao.filter(item => 

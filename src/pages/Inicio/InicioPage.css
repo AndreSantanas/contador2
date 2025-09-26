@@ -1,9 +1,10 @@
 /* ========================================================= */
-/* ESTILOS GERAIS (APLICÁVEIS A AMBOS)                       */
+/* ESTILOS GERAIS                                            */
 /* ========================================================= */
 .inicio-container {
   padding: 20px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -15,7 +16,7 @@
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  display: grid; /* Usamos grid para ambos */
+  display: grid;
   gap: 25px;
 }
 
@@ -55,28 +56,26 @@
 /* LAYOUT PADRÃO (INSPETORA)                                 */
 /* ========================================================= */
 .buttons-section {
-  grid-template-columns: repeat(2, 1fr); /* 2 colunas */
+  grid-template-columns: repeat(2, 1fr);
   max-width: 800px;
 }
 
 
 /* ========================================================= */
 /* LAYOUT ESPECÍFICO (NUTRICIONISTA)                         */
-/* A classe .nutri-grid garante que isso NÃO afete a inspetora */
 /* ========================================================= */
 .buttons-section.nutri-grid {
-  grid-template-columns: repeat(2, 1fr); /* 2 colunas, como solicitado */
-  max-width: 900px; /* Um pouco mais largo para os 8 botões */
-  /* Como são 8 botões em 2 colunas, o grid criará 4 linhas automaticamente */
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 900px;
 }
 
 
 /* ========================================================= */
-/* RESPONSIVIDADE (APLICÁVEL A AMBOS)                        */
+/* RESPONSIVIDADE                                            */
 /* ========================================================= */
 @media (max-width: 768px) {
   .buttons-section {
-    grid-template-columns: 1fr; /* Em celulares, ambos terão 1 coluna */
+    grid-template-columns: 1fr;
     padding: 25px;
     gap: 15px;
   }
@@ -85,4 +84,41 @@
     font-size: 1rem;
     padding: 15px;
   }
+}
+
+/* ========================================================= */
+/* RODAPÉ E BOTÃO DE VOLTAR                                  */
+/* ========================================================= */
+.inicio-footer {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 30px;
+  display: flex;
+  justify-content: center; /* <-- CORREÇÃO: Alinha o botão ao centro */
+}
+
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+}
+
+.back-button {
+  background-color: #333;
+}
+
+.back-button:hover {
+  background-color: #555;
 }

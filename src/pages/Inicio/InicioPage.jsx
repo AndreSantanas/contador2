@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './InicioPage.css';
 
-// Objeto de configuração para os botões. Fica mais fácil de gerenciar!
 const botoesConfig = {
   inspetora: [
     { texto: 'Nova Contagem', icone: 'bi bi-plus-circle-fill', rota: '/nova-contagem' },
@@ -11,27 +10,24 @@ const botoesConfig = {
     { texto: 'Perfil', icone: 'bi bi-person-fill', rota: '/perfil' },
   ],
   nutri: [
-    { texto: 'Contagem Geral', icone: 'bi bi-list-check', rota: '/contagem-geral' },
     { texto: 'Controle de Produção', icone: 'bi bi-graph-up', rota: '/nutri/controle-producao' },
+    { texto: 'Contagem Geral', icone: 'bi bi-list-check', rota: '/contagem-geral' },
     { texto: 'Relatório Personalizado', icone: 'bi bi-file-earmark-text-fill', rota: '/relatorio-personalizado' },
     { texto: 'Cardápio', icone: 'bi bi-journal-text', rota: '/cardapio' },
     { texto: 'Chat', icone: 'bi bi-chat-dots-fill', rota: '/chat' },
-    { texto: 'Gerenciar', icone: 'bi bi-gear-fill', rota: '/gerenciar' },
+    { texto: 'Gerenciar', icone: 'bi bi-gear-fill', rota: '/nutri/gerenciar' },
     { texto: 'Cronograma', icone: 'bi bi-calendar-week-fill', rota: '/cronograma' },
     { texto: 'Perfil', icone: 'bi bi-person-fill', rota: '/perfil' },
   ]
 };
 
-// 1. O componente agora recebe a prop 'userRole'
 const InicioPage = ({ userRole }) => {
   const navigate = useNavigate();
 
-  // 2. Seleciona a lista de botões correta com base na userRole
-  const botoesParaRenderizar = botoesConfig[userRole] || []; // Usa um array vazio como padrão
+  const botoesParaRenderizar = botoesConfig[userRole] || [];
 
   return (
     <section className="inicio-container">
-      {/* 3. Renderiza os botões dinamicamente com .map() */}
       <div className={`buttons-section ${userRole === 'nutri' ? 'nutri-grid' : ''}`}>
         {botoesParaRenderizar.map((botao, index) => (
           <button 
@@ -42,6 +38,22 @@ const InicioPage = ({ userRole }) => {
             <i className={botao.icone}></i> {botao.texto}
           </button>
         ))}
+      </div>
+
+      {/* ========================================================= */}
+      {/* BOTÃO DE VOLTAR ADICIONADO APENAS PARA A NUTRICIONISTA   */}
+      {/* ========================================================= */}
+      <div className="inicio-footer">
+        {userRole === 'nutri' && (
+          <button 
+            className="action-button back-button" 
+            // Supondo que o dashboard principal da nutri seja em /nutri/dashboard
+            // Se for apenas para voltar na história, use navigate(-1)
+            onClick={() => navigate('/nutri/dashboard')} 
+          >
+            <i className="bi bi-arrow-left"></i> Voltar para Dashboard
+          </button>
+        )}
       </div>
     </section>
   );

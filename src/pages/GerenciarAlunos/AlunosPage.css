@@ -1,0 +1,214 @@
+.alunos-container {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 10vh;
+}
+
+.alunos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #8B0000;
+  padding-bottom: 15px;
+}
+
+.alunos-header h1 {
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  max-height: 60vh;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* ========================================================= */
+/* CORREÇÃO PARA A QUEBRA DA TABELA                          */
+/* ========================================================= */
+.alunos-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: absolute; /* 1. Força a tabela a obedecer as larguras definidas */
+}
+
+.alunos-table th, .alunos-table td {
+  padding: 10px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
+  word-wrap: break-word; /* 2. Garante que textos longos quebrem a linha DENTRO da célula */
+  /* Removemos o 'white-space: nowrap' que causava o problema */
+}
+/* ========================================================= */
+
+.alunos-table thead {
+  background-color: #8B0000;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.alunos-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+.coluna-foto {
+  width: 80px;
+  text-align: center;
+}
+
+.aluno-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+  background-color: #f0f0f0;
+}
+
+.coluna-acoes {
+  width: 150px;
+  text-align: center;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 5px;
+}
+
+.pagination-button {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #c51212;
+  border-radius: 4px;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button.active {
+  background-color: #b11010;
+  color: white;
+  border-color: #b11717;
+  cursor: default;
+}
+
+.pagination-button.disabled {
+  color: #6c757d;
+  cursor: not-allowed;
+  background-color: #e9ecef;
+}
+
+.alunos-footer {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Estilos de botões reutilizados */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.action-button:hover { transform: translateY(-2px); }
+.add-button { background-color: #28a745; }
+.add-button:hover { background-color: #218838; }
+.edit-button, .delete-button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  flex-grow: 1;
+  justify-content: center;
+}
+.edit-button { background-color: #ffc107; color: #333;
+height: 59px; }
+.edit-button:hover { background-color: #e0a800; }
+.delete-button { background-color: #dc3545; }
+.delete-button:hover { background-color: #c82333; }
+.back-button { background-color: #333; }
+.back-button:hover { background-color: #555; }
+
+/* ========================================================= */
+/* ESTILOS PARA O FORMULÁRIO DENTRO DO MODAL (SWAL)          */
+/* ========================================================= */
+
+/* Container do formulário com altura máxima e scroll */
+.swal-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espaçamento consistente entre os itens */
+  max-height: 70vh; /* Altura máxima de 70% da tela */
+  overflow-y: auto; /* Ativa o scroll vertical se o conteúdo passar da altura */
+  padding: 10px 15px; /* Espaçamento interno para o scroll não colar nos campos */
+  text-align: left; /* Alinha labels e campos à esquerda */
+}
+
+/* Regra para TODOS os campos terem o mesmo visual */
+.swal-form-container .swal2-input,
+.swal-form-container .swal2-select,
+.swal-form-container .swal2-file {
+  width: 100%;
+  padding: 12px 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  box-sizing: border-box; /* Garante que o padding não altere a largura final */
+  margin: 0 !important; /* Remove margens padrão do Swal para nosso controle */
+}
+
+.swal-form-container .swal2-input{
+min-width: 100%;
+align-items: end;
+}
+
+/* Ajuste específico para o select parecer com os outros campos */
+.swal2-select {
+  height: auto; /* Altura automática baseada no padding */
+}
+
+/* Estilo para as labels dos campos (como a da foto) */
+.swal2-file-label {
+  font-size: 0.9em;
+  color: #555;
+  margin: 0;
+  margin-bottom: -5px; /* Puxa um pouco para perto do campo */
+  display: block;
+}
+
+/* Tira a borda do input de arquivo para um visual mais limpo */
+.swal2-file {
+  border: none;
+  padding-left: 0;
+}

@@ -7,6 +7,12 @@ import MainLayout from './layouts/MainLayout/MainLayout';
 import InicioPage from './pages/Inicio/InicioPage'; // Página genérica de início/ações
 import DashboardNutri from './pages/DashboardNutri/DashboardNutri'; // Dashboard específico da Nutri
 import ControleProducaoPage from './pages/ControleProducao/ControleProducaoPage'; // Página de Controle de Produção
+import OpcoesPage from './pages/Opcoes/OpcoesPage';
+import CategoriasPage from './pages/GerenciarCategorias/CategoriasPage';
+import TurmasPage from './pages/GerenciarTurmas/TurmasPage';
+import UsuariosPage from './pages/GerenciarUsuarios/UsuariosPage';
+import NecessidadesPage from './pages/GerenciarNecessidades/NecessidadesPage';
+import AlunosPage from './pages/GerenciarAlunos/AlunosPage';
 
 // =========================================================
 // Definições de Rota
@@ -133,6 +139,69 @@ function App() {
             <PrivateRoute requiredRole="nutri">
               <MainLayout userRole="nutri">
                 <ControleProducaoPage />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+       />
+                 <Route 
+          path="/nutri/gerenciar" 
+          element={
+            <PrivateRoute requiredRole="nutri">
+              <MainLayout userRole="nutri">
+                <OpcoesPage /> {/* 2. Renderiza o componente renomeado */}
+              </MainLayout>
+            </PrivateRoute>
+          } 
+ 
+        
+        />
+        {/* 2. Adicione a nova rota para GERENCIAR CATEGORIAS */}
+        <Route 
+          path="/nutri/gerenciar/categorias" 
+          element={
+            <PrivateRoute requiredRole="nutri">
+              <MainLayout userRole="nutri">
+                <CategoriasPage />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/nutri/gerenciar/turmas" 
+          element={
+            <PrivateRoute requiredRole="nutri">
+              <MainLayout userRole="nutri">
+                <TurmasPage />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/nutri/gerenciar/usuarios" 
+          element={
+            <PrivateRoute requiredRole="nutri">
+              <MainLayout userRole="nutri">
+                <UsuariosPage />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/nutri/gerenciar/necessidades" 
+          element={
+            <PrivateRoute requiredRole="nutri">
+              <MainLayout userRole="nutri">
+                <NecessidadesPage />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/nutri/gerenciar/alunos" 
+          element={
+            <PrivateRoute requiredRole="nutri">
+              <MainLayout userRole="nutri">
+                <AlunosPage />
               </MainLayout>
             </PrivateRoute>
           } 

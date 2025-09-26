@@ -6,6 +6,7 @@
   width: 100%;
   max-width: 1200px;
   color: #333;
+  margin-top: 10vh;
 }
 
 .producao-header {
@@ -99,10 +100,12 @@
 .add-button { background-color: #28a745; }
 .add-button:hover { background-color: #218838; }
 
-.edit-button { background-color: #ffc107; color: #333; }
+.edit-button { background-color: #ffc107; color: #333; 
+max-width: 60px;}
 .edit-button:hover { background-color: #e0a800; }
 
-.delete-button { background-color: #dc3545; }
+.delete-button { background-color: #dc3545;
+max-width: 60px; }
 .delete-button:hover { background-color: #c82333; }
 
 /* Estilos para o modal do SweetAlert */

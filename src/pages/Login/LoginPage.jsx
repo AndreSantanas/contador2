@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Continua sendo necessário para o redirect PÓS-LOGIN
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2/dist/sweetalert2.all.min.js';
 import { loginUser, getUserData } from '../../services/api';
 import { showTermsModal, showPrivacyModal } from '../../utils/modals';
 import './LoginPage.css';
@@ -8,24 +9,24 @@ import logo from '../../assets/img/code.png';
 const LoginPage = () => {
   const [nif, setNif] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); 
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Esta função continua aqui, pois é usada pelo handleSubmit para redirecionar APÓS o login ser bem-sucedido.
   const navigateBasedOnLevel = (level) => {
-    switch (level) {
-      case '0': navigate('/inspetora/dashboard'); break;
-      case '1': navigate('/nutri/dashboard'); break;
-      case '2': navigate('/admin/dashboard'); break;
+    switch (String(level)) {
+      case '1': navigate('/inspetora/inicio'); break;
+      case '2': navigate('/nutri/inicio'); break;
       default:
-        setError('Nível de usuário desconhecido.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Acesso Negado',
+          text: 'Seu nível de usuário não tem uma página de destino configurada.',
+        });
         localStorage.clear();
         break;
     }
   };
-
-  // O hook useEffect FOI REMOVIDO DAQUI. O PublicRoute agora faz esse trabalho.
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -43,12 +44,34 @@ const LoginPage = () => {
       
       setIsLoading(false);
       
-      // Redireciona o usuário após o sucesso do login
+      // =========================================================
+      // SWEETALERT DE SUCESSO PERSONALIZADO
+      // =========================================================
+      await Swal.fire({
+        // icon: 'success', // Ícone removido
+        title: 'Bem-vindo(a)!', // Novo título
+        text: userData.name, // Apenas o nome do usuário
+        timer: 1500,
+        showConfirmButton: false,
+        allowOutsideClick: false
+      });
+
       navigateBasedOnLevel(userData.nivel_user);
 
     } catch (err) {
-      setError(err.message || 'NIF ou senha inválidos. Tente novamente.');
       setIsLoading(false);
+      setError(err.message);
+      
+      // =========================================================
+      // SWEETALERT DE ERRO PERSONALIZADO
+      // =========================================================
+      Swal.fire({
+        // icon: 'error', // Ícone removido
+        title: 'Oops... Falha no Login',
+        text: err.message || 'NIF ou senha inválidos. Verifique seus dados.',
+        confirmButtonText: 'Tentar Novamente', // Novo texto do botão
+        confirmButtonColor: '#d33', // Botão vermelho
+      });
     }
   };
 
@@ -82,8 +105,6 @@ const LoginPage = () => {
             <span>Senha</span>
             <i></i>
           </div>
-
-          {error && <p className="error-message">{error}</p>}
 
           <input 
             type="submit" 

@@ -34,7 +34,7 @@
     z-index: 2;
 }
 .header {
-    z-index: 99999; /* Muito acima */
+    z-index: 999; /* Muito acima */
     position: relative;
   }
   
