@@ -1,446 +1,129 @@
+import Swal from 'sweetalert2/dist/sweetalert2.all.min.js';
 import { API_BASE_URL } from '../config/apiConfig';
 
 /**
- * Realiza o login do usuário.
- * @param {string} nif - O NIF do usuário.
- * @param {string} password - A senha do usuário.
- * @returns {Promise<object>} - A resposta da API com o token.
+ * Função Central de Fetch: Lida com token, erro 401, JSON e FormData em um só lugar.
+ * @param {string} endpoint - O endpoint da API (ex: '/alunos').
+ * @param {object} options - As opções do fetch (method, body, etc.).
+ * @returns {Promise<object>} - A resposta da API em formato JSON.
  */
-export const loginUser = async (nif, password) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({ nif: nif, password: password }),
-    });
+const apiFetch = async (endpoint, options = {}) => {
+  const token = localStorage.getItem('authToken');
+  
+  const headers = {
+    'Accept': 'application/json',
+    ...options.headers,
+  };
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Erro ao tentar fazer login.');
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Falha no login:', error);
-    throw error;
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
-};
 
-/**
- * Busca os dados do usuário autenticado.
- * @param {string} token - O token de autenticação.
- * @returns {Promise<object>} - Os dados completos do usuário.
- */
-export const getUserData = async (token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/user`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Erro ao buscar dados do usuário.');
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Falha ao buscar dados do usuário:', error);
-    throw error;
+  // Lógica inteligente: só configura como JSON se o body NÃO for FormData
+  if (options.body && !(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(options.body);
   }
-};
 
-/**
- * Desconecta o usuário da API.
- * @param {string} token - O token de autenticação do usuário.
- * @returns {Promise<object>} - A resposta de sucesso da API.
- */
-export const logoutUser = async (token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/logout`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-      },
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
+
+  // Lida com sessão expirada (erro 401)
+  if (response.status === 401) {
+    localStorage.clear();
+    await Swal.fire({
+      title: 'Sessão Expirada',
+      text: 'Por favor, faça o login novamente.',
+      icon: 'warning',
+      confirmButtonColor: '#8B0000',
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.warn('API de logout falhou, mas o usuário será desconectado localmente.', data.message);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Falha na chamada de logout:', error);
-    throw error;
+    window.location.href = '/';
+    throw new Error('Sessão expirada.');
   }
+
+  // Lida com outros erros
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'Erro de comunicação com o servidor.' }));
+    throw new Error(errorData.message || 'Ocorreu um erro na requisição.');
+  }
+
+  // Retorna JSON ou um objeto de sucesso para respostas sem corpo
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.indexOf("application/json") !== -1) {
+    if (response.status === 204) return { success: true }; // Ex: para DELETE
+    return response.json();
+  }
+  return { success: true };
 };
 
+// --- FUNÇÕES DE AUTENTICAÇÃO ---
+export const loginUser = (nif, password) => apiFetch('/login', { method: 'POST', body: { nif, password } });
+export const getUserData = () => apiFetch('/user');
+export const logoutUser = () => apiFetch('/logout', { method: 'POST' });
 
+// --- FUNÇÕES DE PRODUÇÃO ---
+export const getProducao = () => apiFetch('/controle_de_producao');
+export const addProducao = (data) => apiFetch('/controle_de_producao', { method: 'POST', body: data });
+export const updateProducao = (id, data) => apiFetch(`/controle_de_producao/${id}`, { method: 'PUT', body: data });
+export const deleteProducao = (id) => apiFetch(`/controle_de_producao/${id}`, { method: 'DELETE' });
 
-export const getProducao = async (token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/controle_de_producao`, { // ENDEREÇO CORRIGIDO
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao buscar dados de produção.');
-    return await response.json();
-  } catch (error) { console.error("Erro em getProducao:", error); throw error; }
-};
+// --- FUNÇÕES DE CATEGORIAS ---
+export const getCategorias = (page = 1) => apiFetch(`/categorias?page=${page}`);
+export const addCategoria = (nome_categoria) => apiFetch('/categorias', { method: 'POST', body: { nome_categoria } });
+export const updateCategoria = (id, nome_categoria) => apiFetch(`/categorias/${id}`, { method: 'PUT', body: { nome_categoria } });
+export const deleteCategoria = (id) => apiFetch(`/categorias/${id}`, { method: 'DELETE' });
 
-export const addProducao = async (itemData, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/controle_de_producao`, { // ENDEREÇO CORRIGIDO
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(itemData),
-    });
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Falha ao adicionar item.');
-    }
-    return await response.json();
-  } catch (error) { console.error("Erro em addProducao:", error); throw error; }
-};
+// --- FUNÇÕES DE TURMAS ---
+export const getTurmas = (page = 1) => apiFetch(`/turmas?page=${page}`);
+export const addTurma = (data) => apiFetch('/turmas', { method: 'POST', body: data });
+export const updateTurma = (id, data) => apiFetch(`/turmas/${id}`, { method: 'PUT', body: data });
+export const deleteTurma = (id) => apiFetch(`/turmas/${id}`, { method: 'DELETE' });
 
-export const updateProducao = async (id, itemData, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/controle_de_producao/${id}`, { // ENDEREÇO CORRIGIDO
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(itemData),
-    });
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Falha ao atualizar item.');
-    }
-    return await response.json();
-  } catch (error) { console.error("Erro em updateProducao:", error); throw error; }
-};
+// --- FUNÇÕES DE NECESSIDADES ---
+export const getNecessidades = (page = 1, limit = 100) => apiFetch(`/necessidades?page=${page}&limit=${limit}`);
+export const getNecessidadeComAlunos = (id) => apiFetch(`/necessidades/${id}`);
+export const addNecessidade = (necessidade) => apiFetch('/necessidades', { method: 'POST', body: { necessidade } });
+export const updateNecessidade = (id, necessidade) => apiFetch(`/necessidades/${id}`, { method: 'PUT', body: { necessidade } });
+export const deleteNecessidade = (id) => apiFetch(`/necessidades/${id}`, { method: 'DELETE' });
 
-export const deleteProducao = async (id, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/controle_de_producao/${id}`, { // ENDEREÇO CORRIGIDO
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao deletar item.');
-    return { success: true };
-  } catch (error) { console.error("Erro em deleteProducao:", error); throw error; }
-};
+// --- FUNÇÕES DE ALUNOS ---
+export const getAlunos = (page = 1, limit = 500) => apiFetch(`/alunos?page=${page}&limit=${limit}`);
+export const deleteAluno = (id) => apiFetch(`/alunos/${id}`, { method: 'DELETE' });
+export const associarNecessidadesAoAluno = (alunoId, necessidades) => apiFetch(`/alunos/${alunoId}/necessidades`, { method: 'POST', body: { necessidades } });
 
+// Versões para dados simples (JSON), usadas pela página 'Gerenciar Alunos'
+export const addAluno = (data) => apiFetch('/alunos', { method: 'POST', body: data });
+export const updateAluno = (id, data) => apiFetch(`/alunos/${id}`, { method: 'PUT', body: data });
 
-/**
- * Busca a lista de categorias, com suporte a paginação.
- * @param {string} token - O token de autenticação.
- * @param {number} page - O número da página a ser buscada.
- */
-export const getCategorias = async (token, page = 1) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/categorias?page=${page}`, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao buscar categorias.');
-    return await response.json();
-  } catch (error) { console.error("Erro em getCategorias:", error); throw error; }
-};
-
-/**
- * Adiciona uma nova categoria.
- * @param {string} nomeCategoria - O nome da nova categoria.
- * @param {string} token - O token de autenticação.
- */
-export const addCategoria = async (nomeCategoria, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/categorias`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ nome_categoria: nomeCategoria }),
-    });
-    if (!response.ok) throw new Error('Falha ao adicionar categoria.');
-    return await response.json();
-  } catch (error) { console.error("Erro em addCategoria:", error); throw error; }
-};
-
-/**
- * Atualiza uma categoria existente.
- * @param {number} id - O ID da categoria.
- * @param {string} nomeCategoria - O novo nome da categoria.
- * @param {string} token - O token de autenticação.
- */
-export const updateCategoria = async (id, nomeCategoria, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/categorias/${id}`, {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ nome_categoria: nomeCategoria }),
-    });
-    if (!response.ok) throw new Error('Falha ao atualizar categoria.');
-    return await response.json();
-  } catch (error) { console.error("Erro em updateCategoria:", error); throw error; }
-};
-
-/**
- * Deleta uma categoria.
- * @param {number} id - O ID da categoria.
- * @param {string} token - O token de autenticação.
- */
-export const deleteCategoria = async (id, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/categorias/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao deletar categoria.');
-    return { success: true };
-  } catch (error) { console.error("Erro em deleteCategoria:", error); throw error; }
-};
-
-
-/**
- * Busca a lista de turmas, com suporte a paginação.
- * @param {string} token - O token de autenticação.
- * @param {number} page - O número da página a ser buscada.
- */
-export const getTurmas = async (token, page = 1) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/turmas?page=${page}`, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao buscar turmas.');
-    return await response.json();
-  } catch (error) { console.error("Erro em getTurmas:", error); throw error; }
-};
-
-/**
- * Adiciona uma nova turma.
- * @param {object} turmaData - Dados da turma { nome_turma, categorias_id }.
- * @param {string} token - O token de autenticação.
- */
-export const addTurma = async (turmaData, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/turmas`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(turmaData),
-    });
-    if (!response.ok) throw new Error('Falha ao adicionar turma.');
-    return await response.json();
-  } catch (error) { console.error("Erro em addTurma:", error); throw error; }
-};
-
-/**
- * Atualiza uma turma existente.
- * @param {number} id - O ID da turma.
- * @param {object} turmaData - Dados da turma { nome_turma, categorias_id }.
- * @param {string} token - O token de autenticação.
- */
-export const updateTurma = async (id, turmaData, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/turmas/${id}`, {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(turmaData),
-    });
-    if (!response.ok) throw new Error('Falha ao atualizar turma.');
-    return await response.json();
-  } catch (error) { console.error("Erro em updateTurma:", error); throw error; }
-};
-
-/**
- * Deleta uma turma.
- * @param {number} id - O ID da turma.
- * @param {string} token - O token de autenticação.
- */
-export const deleteTurma = async (id, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/turmas/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao deletar turma.');
-    return { success: true };
-  } catch (error) { console.error("Erro em deleteTurma:", error); throw error; }
-};
-
-
-export const getUsers = async (token, page = 1) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/user?page=${page}`, { // Assumindo GET /api/users
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao buscar usuários.');
-    return await response.json();
-  } catch (error) { console.error("Erro em getUsers:", error); throw error; }
-};
-
-export const addUser = async (userData, token) => {
-  try {
-    // Usando a rota de registro para criar um novo usuário
-    const response = await fetch(`${API_BASE_URL}/register`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(userData),
-    });
-    if (!response.ok) throw new Error('Falha ao adicionar usuário.');
-    return await response.json();
-  } catch (error) { console.error("Erro em addUser:", error); throw error; }
-};
-
-export const updateUser = async (id, userData, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/user/${id}`, { // Assumindo PUT /api/users/{id}
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(userData),
-    });
-    if (!response.ok) throw new Error('Falha ao atualizar usuário.');
-    return await response.json();
-  } catch (error) { console.error("Erro em updateUser:", error); throw error; }
-};
-
-export const deleteUser = async (id, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/user/${id}`, { // Assumindo DELETE /api/users/{id}
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao deletar usuário.');
-    return { success: true };
-  } catch (error) { console.error("Erro em deleteUser:", error); throw error; }
-};
-
-export const getNecessidades = async (token, page = 1) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/necessidades?page=${page}`, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao buscar necessidades.');
-    return await response.json();
-  } catch (error) { console.error("Erro em getNecessidades:", error); throw error; }
-};
-
-export const addNecessidade = async (necessidade, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/necessidades`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ necessidade: necessidade }),
-    });
-    if (!response.ok) throw new Error('Falha ao adicionar necessidade.');
-    return await response.json();
-  } catch (error) { console.error("Erro em addNecessidade:", error); throw error; }
-};
-
-export const updateNecessidade = async (id, necessidade, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/necessidades/${id}`, {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ necessidade: necessidade }),
-    });
-    if (!response.ok) throw new Error('Falha ao atualizar necessidade.');
-    return await response.json();
-  } catch (error) { console.error("Erro em updateNecessidade:", error); throw error; }
-};
-
-export const deleteNecessidade = async (id, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/necessidades/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao deletar necessidade.');
-    return { success: true };
-  } catch (error) { console.error("Erro em deleteNecessidade:", error); throw error; }
-};
-
-
-// ... (suas funções existentes) ...
-
-// =========================================================
-// FUNÇÕES CRUD PARA ALUNOS (COM UPLOAD DE ARQUIVO)
-// =========================================================
-
-export const getAlunos = async (token, page = 1) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/alunos?page=${page}`, { // Assumindo GET /api/alunos
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao buscar alunos.');
-    return await response.json();
-  } catch (error) { console.error("Erro em getAlunos:", error); throw error; }
-};
-
-// Adicionar Aluno com Foto
-export const addAluno = async (alunoData, token) => {
-  try {
-    // 1. Criamos um FormData para enviar arquivos
+// Versões para dados com FOTO (FormData), usadas pela página 'NAI'
+export const addAlunoComFoto = (alunoData) => {
     const formData = new FormData();
-    // 2. Adicionamos cada campo ao formData
-    Object.keys(alunoData).forEach(key => {
-      formData.append(key, alunoData[key]);
-    });
-
-    const response = await fetch(`${API_BASE_URL}/alunos`, {
-      method: 'POST',
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-        // NÃO definimos 'Content-Type', o navegador faz isso automaticamente para FormData
-      },
-      body: formData,
-    });
-    if (!response.ok) throw new Error('Falha ao adicionar aluno.');
-    return await response.json();
-  } catch (error) { console.error("Erro em addAluno:", error); throw error; }
+    for (const key in alunoData) {
+        if (alunoData[key] !== null && alunoData[key] !== undefined) {
+            formData.append(key, alunoData[key]);
+        }
+    }
+    // Usa a apiFetch, que agora sabe lidar com FormData
+    return apiFetch('/alunos', { method: 'POST', body: formData });
 };
 
-// Atualizar Aluno com Foto
-export const updateAluno = async (id, alunoData, token) => {
-  try {
+export const updateAlunoComFoto = (id, alunoData) => {
     const formData = new FormData();
-    Object.keys(alunoData).forEach(key => {
-      formData.append(key, alunoData[key]);
-    });
-    formData.append('_method', 'PUT'); // Truque para enviar PUT com FormData
-
-    const response = await fetch(`${API_BASE_URL}/alunos/${id}`, {
-      method: 'POST', // Usamos POST para enviar FormData na atualização
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      },
-      body: formData,
-    });
-    if (!response.ok) throw new Error('Falha ao atualizar aluno.');
-    return await response.json();
-  } catch (error) { console.error("Erro em updateAluno:", error); throw error; }
+    for (const key in alunoData) {
+        if (alunoData[key] !== null && alunoData[key] !== undefined) {
+            formData.append(key, alunoData[key]);
+        }
+    }
+    formData.append('_method', 'PUT'); // Truque do Laravel para PUT com FormData
+    // Usa POST no método, mas o Laravel interpreta como PUT por causa do _method
+    return apiFetch(`/alunos/${id}`, { method: 'POST', body: formData });
 };
 
-export const deleteAluno = async (id, token) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/alunos/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Falha ao deletar aluno.');
-    return { success: true };
-  } catch (error) { console.error("Erro em deleteAluno:", error); throw error; }
+// --- FUNÇÕES DE CRONOGRAMA ---
+export const getCronograma = () => apiFetch('/cronogramas');
+export const getDias = async () => {
+    return Promise.resolve([
+        { id: 1, dia: 'Segunda' }, { id: 2, dia: 'Terca' }, { id: 3, dia: 'Quarta' },
+        { id: 4, dia: 'Quinta' }, { id: 5, dia: 'Sexta' }
+    ]);
 };
+export const agendarRelacaoNosDias = (relacaoId, dias) => apiFetch(`/alunos/${relacaoId}/dias`, { method: 'POST', body: { dias } });

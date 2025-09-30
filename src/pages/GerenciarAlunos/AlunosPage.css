@@ -5,7 +5,6 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 1200px;
-  margin-top: 10vh;
 }
 
 .alunos-header {
@@ -30,13 +29,10 @@
   border-radius: 8px;
 }
 
-/* ========================================================= */
-/* CORREÇÃO PARA A QUEBRA DA TABELA                          */
-/* ========================================================= */
 .alunos-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: absolute; /* 1. Força a tabela a obedecer as larguras definidas */
+  table-layout: fixed;
 }
 
 .alunos-table th, .alunos-table td {
@@ -44,10 +40,8 @@
   text-align: left;
   border-bottom: 1px solid #ddd;
   vertical-align: middle;
-  word-wrap: break-word; /* 2. Garante que textos longos quebrem a linha DENTRO da célula */
-  /* Removemos o 'white-space: nowrap' que causava o problema */
+  word-wrap: break-word;
 }
-/* ========================================================= */
 
 .alunos-table thead {
   background-color: #8B0000;
@@ -86,7 +80,6 @@
   justify-content: center;
 }
 
-
 .pagination-container {
   display: flex;
   justify-content: center;
@@ -101,7 +94,7 @@
   padding: 8px 12px;
   cursor: pointer;
   transition: background-color 0.2s;
-  color: #c51212;
+  color: #007bff;
   border-radius: 4px;
 }
 
@@ -110,9 +103,9 @@
 }
 
 .pagination-button.active {
-  background-color: #b11010;
+  background-color: #007bff;
   color: white;
-  border-color: #b11717;
+  border-color: #007bff;
   cursor: default;
 }
 
@@ -123,7 +116,7 @@
 }
 
 .alunos-footer {
-  margin-top: 30px;
+  margin-top: 20px;
   display: flex;
   justify-content: flex-start;
 }
@@ -146,36 +139,32 @@
 .action-button:hover { transform: translateY(-2px); }
 .add-button { background-color: #28a745; }
 .add-button:hover { background-color: #218838; }
+.back-button { background-color: #333; }
+.back-button:hover { background-color: #555; }
+
 .edit-button, .delete-button {
   padding: 8px 12px;
   font-size: 0.9rem;
   flex-grow: 1;
   justify-content: center;
 }
-.edit-button { background-color: #ffc107; color: #333;
-height: 59px; }
+.edit-button { background-color: #ffc107; color: #333; 
+min-height: 60px;}
 .edit-button:hover { background-color: #e0a800; }
 .delete-button { background-color: #dc3545; }
 .delete-button:hover { background-color: #c82333; }
-.back-button { background-color: #333; }
-.back-button:hover { background-color: #555; }
 
-/* ========================================================= */
-/* ESTILOS PARA O FORMULÁRIO DENTRO DO MODAL (SWAL)          */
-/* ========================================================= */
 
-/* Container do formulário com altura máxima e scroll */
+/* Estilos para o formulário no Swal */
 .swal-form-container {
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Espaçamento consistente entre os itens */
-  max-height: 70vh; /* Altura máxima de 70% da tela */
-  overflow-y: auto; /* Ativa o scroll vertical se o conteúdo passar da altura */
-  padding: 10px 15px; /* Espaçamento interno para o scroll não colar nos campos */
-  text-align: left; /* Alinha labels e campos à esquerda */
+  gap: 15px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 10px 15px;
+  text-align: left;
 }
-
-/* Regra para TODOS os campos terem o mesmo visual */
 .swal-form-container .swal2-input,
 .swal-form-container .swal2-select,
 .swal-form-container .swal2-file {
@@ -184,31 +173,9 @@ height: 59px; }
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1em;
-  box-sizing: border-box; /* Garante que o padding não altere a largura final */
-  margin: 0 !important; /* Remove margens padrão do Swal para nosso controle */
+  box-sizing: border-box;
+  margin: 0 !important;
 }
-
-.swal-form-container .swal2-input{
-min-width: 100%;
-align-items: end;
-}
-
-/* Ajuste específico para o select parecer com os outros campos */
-.swal2-select {
-  height: auto; /* Altura automática baseada no padding */
-}
-
-/* Estilo para as labels dos campos (como a da foto) */
-.swal2-file-label {
-  font-size: 0.9em;
-  color: #555;
-  margin: 0;
-  margin-bottom: -5px; /* Puxa um pouco para perto do campo */
-  display: block;
-}
-
-/* Tira a borda do input de arquivo para um visual mais limpo */
-.swal2-file {
-  border: none;
-  padding-left: 0;
-}
+.swal2-select { height: auto; }
+.swal2-file-label { font-size: 0.9em; color: #555; margin: 0; margin-bottom: -5px; display: block; }
+.swal2-file { border: none; padding-left: 0; }

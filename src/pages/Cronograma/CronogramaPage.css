@@ -1,0 +1,113 @@
+.cronograma-container {
+  width: 100%;
+  max-width: 95vw;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.cronograma-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding: 0 10px;
+}
+
+.cronograma-header h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.cronograma-board {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.day-column {
+  flex: 1;
+  min-width: 250px;
+  background-color: #f4f5f7;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.day-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #172b4d;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #ddd;
+  text-align: center;
+}
+
+.cards-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: 65vh;
+  padding-right: 5px;
+}
+
+.student-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.student-name {
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.necessidades-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.necessidade-badge {
+  background-color: #007bff;
+  color: white;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+.loading-message {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #555;
+  padding: 50px;
+}
+
+/* Estilos de botões genéricos (devem estar no seu App.css ou similar) */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.action-button:hover {
+  transform: translateY(-2px);
+}
+.back-button {
+  background-color: #333;
+}
+.back-button:hover {
+  background-color: #555;
+}

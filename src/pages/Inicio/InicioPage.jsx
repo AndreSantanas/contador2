@@ -16,7 +16,7 @@ const botoesConfig = {
     { texto: 'Cardápio', icone: 'bi bi-journal-text', rota: '/cardapio' },
     { texto: 'Chat', icone: 'bi bi-chat-dots-fill', rota: '/chat' },
     { texto: 'Gerenciar', icone: 'bi bi-gear-fill', rota: '/nutri/gerenciar' },
-    { texto: 'Cronograma', icone: 'bi bi-calendar-week-fill', rota: '/cronograma' },
+    { texto: 'Cronograma', icone: 'bi bi-calendar-week-fill', rota: '/nutri/cronograma' },
     { texto: 'Perfil', icone: 'bi bi-person-fill', rota: '/perfil' },
   ]
 };

@@ -13,6 +13,11 @@ import TurmasPage from './pages/GerenciarTurmas/TurmasPage';
 import UsuariosPage from './pages/GerenciarUsuarios/UsuariosPage';
 import NecessidadesPage from './pages/GerenciarNecessidades/NecessidadesPage';
 import AlunosPage from './pages/GerenciarAlunos/AlunosPage';
+import CronogramaPage from './pages/Cronograma/CronogramaPage';
+import PlanejamentoPage from './pages/Planejamento/PlanejamentoPage'; // 1. Importe a nova página
+import NaiPage from './pages/GerenciarNai/NaiPage';
+
+
 
 // =========================================================
 // Definições de Rota
@@ -202,6 +207,36 @@ function App() {
             <PrivateRoute requiredRole="nutri">
               <MainLayout userRole="nutri">
                 <AlunosPage />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/nutri/cronograma" 
+          element={
+            <PrivateRoute requiredRole="nutri">
+              <MainLayout userRole="nutri">
+                <CronogramaPage />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/nutri/planejamento" 
+          element={
+            <PrivateRoute requiredRole="nutri">
+              <MainLayout userRole="nutri">
+                <PlanejamentoPage />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/nutri/gerenciar-nai" 
+          element={
+            <PrivateRoute requiredRole="nutri">
+              <MainLayout userRole="nutri">
+                <NaiPage />
               </MainLayout>
             </PrivateRoute>
           } 
