@@ -8,7 +8,7 @@ const botoesGerenciamento = [
   { texto: 'Gerenciar Categorias', icone: 'bi bi-tags-fill', rota: '/nutri/gerenciar/categorias' },
   { texto: 'Gerenciar Usuários', icone: 'bi bi-person-video2', rota: '/nutri/gerenciar/usuarios' },
   { texto: 'Gerenciar NAI', icone: 'bi bi-person-check-fill', rota: '/nutri/gerenciar-nai' },
-  {texto: 'Planejamento de Necessidades', icone: 'bi bi-card-checklist', rota: '/nutri/planejamento' },
+  {texto: 'Necessidades', icone: 'bi bi-card-checklist', rota: '/nutri/planejamento' },
 ];
 
 const OpcoesPage = () => {

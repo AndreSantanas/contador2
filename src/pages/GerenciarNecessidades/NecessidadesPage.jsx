@@ -13,16 +13,13 @@ const NecessidadesPage = () => {
   const fetchData = async (page = 1) => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        navigate('/');
-        return;
-      }
-      const data = await getNecessidades(token, page);
+      const data = await getNecessidades(page);
       setNecessidades(data.data || []);
       setPagination(data.meta);
     } catch (error) {
-      Swal.fire('Erro!', 'Não foi possível carregar as necessidades.', 'error');
+      if (error && !error.message.includes('Sessão expirada')) {
+        Swal.fire('Erro!', 'Não foi possível carregar as necessidades.', 'error');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -37,30 +34,24 @@ const NecessidadesPage = () => {
       title: item ? 'Editar Necessidade' : 'Adicionar Nova Necessidade',
       input: 'text',
       inputValue: item ? item.necessidade : '',
-      inputPlaceholder: 'Necessidade',
+      inputPlaceholder: 'Nome da Necessidade',
       showCancelButton: true,
       confirmButtonText: 'Salvar',
       confirmButtonColor: '#28a745',
       cancelButtonText: 'Cancelar',
-      cancelButtonColor: '#d33',
-      inputValidator: (value) => {
-        if (!value) {
-          return 'Você precisa descrever a necessidade!';
-        }
-      }
+      inputValidator: (value) => !value && 'Você precisa descrever a necessidade!'
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const token = localStorage.getItem('authToken');
         try {
           if (item) {
-            await updateNecessidade(item.id, result.value, token);
+            await updateNecessidade(item.id, result.value);
           } else {
-            await addNecessidade(result.value, token);
+            await addNecessidade(result.value);
           }
-          Swal.fire('Sucesso!', 'Necessidade salva com sucesso!', 'success');
+          await Swal.fire({icon: 'success', title: 'Sucesso!', text: 'Necessidade salva com sucesso.', timer: 1500, showConfirmButton: false});
           fetchData(pagination?.current_page || 1);
         } catch (error) {
-          Swal.fire('Erro!', 'Não foi possível salvar a necessidade.', 'error');
+          if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível salvar a necessidade.', 'error');
         }
       }
     });
@@ -69,22 +60,20 @@ const NecessidadesPage = () => {
   const handleDelete = (id) => {
     Swal.fire({
       title: 'Tem certeza?',
-      text: "Esta ação não pode ser desfeita.",
+      text: "Isso pode afetar alunos associados a esta necessidade!",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
       confirmButtonText: 'Sim, deletar!',
       cancelButtonText: 'Cancelar',
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const token = localStorage.getItem('authToken');
-          await deleteNecessidade(id, token);
-          Swal.fire('Deletado!', 'A necessidade foi removida.', 'success');
+          await deleteNecessidade(id);
+          await Swal.fire({icon: 'success', title: 'Deletado!', text: 'A necessidade foi removida.', timer: 1500, showConfirmButton: false});
           fetchData(pagination?.current_page || 1);
         } catch (error) {
-          Swal.fire('Erro!', 'Não foi possível deletar a necessidade.', 'error');
+          if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível deletar a necessidade.', 'error');
         }
       }
     });
@@ -113,10 +102,10 @@ const NecessidadesPage = () => {
             <div key={item.id} className="necessidade-card">
               <span className="necessidade-text">{item.necessidade}</span>
               <div className="actions-cell">
-                <button className="action-button edit-button" title="Editar" onClick={() => handleOpenModal(item)}>
+                <button className="action-button-icon edit-button" title="Editar" onClick={() => handleOpenModal(item)}>
                   <i className="bi bi-pencil-fill"></i>
                 </button>
-                <button className="action-button delete-button" title="Deletar" onClick={() => handleDelete(item.id)}>
+                <button className="action-button-icon delete-button" title="Deletar" onClick={() => handleDelete(item.id)}>
                   <i className="bi bi-trash-fill"></i>
                 </button>
               </div>

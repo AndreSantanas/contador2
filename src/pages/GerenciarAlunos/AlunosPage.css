@@ -5,6 +5,8 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 1200px;
+  max-height: 80vh;
+  margin-top: 10vh;
 }
 
 .alunos-header {
@@ -23,10 +25,11 @@
 
 .table-wrapper {
   overflow-x: auto;
-  max-height: 60vh;
+  max-height: 54vh;
   overflow-y: auto;
   border: 1px solid #ddd;
   border-radius: 8px;
+  margin-bottom: -10px;
 }
 
 .alunos-table {

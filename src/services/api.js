@@ -1,58 +1,38 @@
 import Swal from 'sweetalert2/dist/sweetalert2.all.min.js';
 import { API_BASE_URL } from '../config/apiConfig';
 
-/**
- * Função Central de Fetch: Lida com token, erro 401, JSON e FormData em um só lugar.
- * @param {string} endpoint - O endpoint da API (ex: '/alunos').
- * @param {object} options - As opções do fetch (method, body, etc.).
- * @returns {Promise<object>} - A resposta da API em formato JSON.
- */
 const apiFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem('authToken');
-  
-  const headers = {
-    'Accept': 'application/json',
-    ...options.headers,
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  // Lógica inteligente: só configura como JSON se o body NÃO for FormData
+  const headers = { 'Accept': 'application/json', ...options.headers };
+  if (token) { headers['Authorization'] = `Bearer ${token}`; }
   if (options.body && !(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
     options.body = JSON.stringify(options.body);
   }
-
   const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
-
-  // Lida com sessão expirada (erro 401)
   if (response.status === 401) {
     localStorage.clear();
-    await Swal.fire({
-      title: 'Sessão Expirada',
-      text: 'Por favor, faça o login novamente.',
-      icon: 'warning',
-      confirmButtonColor: '#8B0000',
-    });
+    await Swal.fire({ title: 'Sessão Expirada', text: 'Por favor, faça o login novamente.', icon: 'warning', confirmButtonColor: '#8B0000' });
     window.location.href = '/';
     throw new Error('Sessão expirada.');
   }
-
-  // Lida com outros erros
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ message: 'Erro de comunicação com o servidor.' }));
     throw new Error(errorData.message || 'Ocorreu um erro na requisição.');
   }
-
-  // Retorna JSON ou um objeto de sucesso para respostas sem corpo
+  if (response.status === 204) return { success: true };
   const contentType = response.headers.get("content-type");
   if (contentType && contentType.indexOf("application/json") !== -1) {
-    if (response.status === 204) return { success: true }; // Ex: para DELETE
     return response.json();
   }
   return { success: true };
+};
+
+// --- FUNÇÃO DE UPLOAD DE ARQUIVO ---
+export const uploadFile = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return apiFetch('/upload', { method: 'POST', body: formData });
 };
 
 // --- FUNÇÕES DE AUTENTICAÇÃO ---
@@ -87,43 +67,36 @@ export const deleteNecessidade = (id) => apiFetch(`/necessidades/${id}`, { metho
 
 // --- FUNÇÕES DE ALUNOS ---
 export const getAlunos = (page = 1, limit = 500) => apiFetch(`/alunos?page=${page}&limit=${limit}`);
-export const deleteAluno = (id) => apiFetch(`/alunos/${id}`, { method: 'DELETE' });
-export const associarNecessidadesAoAluno = (alunoId, necessidades) => apiFetch(`/alunos/${alunoId}/necessidades`, { method: 'POST', body: { necessidades } });
-
-// Versões para dados simples (JSON), usadas pela página 'Gerenciar Alunos'
 export const addAluno = (data) => apiFetch('/alunos', { method: 'POST', body: data });
 export const updateAluno = (id, data) => apiFetch(`/alunos/${id}`, { method: 'PUT', body: data });
+export const deleteAluno = (id) => apiFetch(`/alunos/${id}`, { method: 'DELETE' });
 
-// Versões para dados com FOTO (FormData), usadas pela página 'NAI'
-export const addAlunoComFoto = (alunoData) => {
-    const formData = new FormData();
-    for (const key in alunoData) {
-        if (alunoData[key] !== null && alunoData[key] !== undefined) {
-            formData.append(key, alunoData[key]);
-        }
-    }
-    // Usa a apiFetch, que agora sabe lidar com FormData
-    return apiFetch('/alunos', { method: 'POST', body: formData });
+// --- FUNÇÕES DE ASSOCIAÇÃO ---
+// Para a tela de Planejamento (Gerenciar Alunos)
+export const associarNecessidadesAoAluno = (alunoId, necessidadesIds) => {
+  return apiFetch(`/alunos/${alunoId}/necessidades`, { method: 'POST', body: { necessidades: necessidadesIds } });
+};
+// Para a tela de Planejamento (botão de remover)
+export const desassociarAlunoDaNecessidade = (necessidadeId, alunoId) => {
+  return apiFetch(`/necessidade/${necessidadeId}/alunos`, { method: 'DELETE', body: { alunos: [alunoId] } });
 };
 
-export const updateAlunoComFoto = (id, alunoData) => {
-    const formData = new FormData();
-    for (const key in alunoData) {
-        if (alunoData[key] !== null && alunoData[key] !== undefined) {
-            formData.append(key, alunoData[key]);
-        }
-    }
-    formData.append('_method', 'PUT'); // Truque do Laravel para PUT com FormData
-    // Usa POST no método, mas o Laravel interpreta como PUT por causa do _method
-    return apiFetch(`/alunos/${id}`, { method: 'POST', body: formData });
-};
 
-// --- FUNÇÕES DE CRONOGRAMA ---
-export const getCronograma = () => apiFetch('/cronogramas');
-export const getDias = async () => {
-    return Promise.resolve([
-        { id: 1, dia: 'Segunda' }, { id: 2, dia: 'Terca' }, { id: 3, dia: 'Quarta' },
-        { id: 4, dia: 'Quinta' }, { id: 5, dia: 'Sexta' }
-    ]);
+
+// --- FUNÇÕES DE CONTAGEM ---
+export const getContagensDeHoje = () => { /* ... */ };
+export const addContagem = (data) => apiFetch('/contagens', { method: 'POST', body: data });
+export const updateContagem = (id, data) => apiFetch(`/contagens/${id}`, { method: 'PUT', body: data });
+
+// Função para buscar os alunos confirmados em uma contagem
+export const getAlunosContagemNes = (contagemId) => apiFetch(`/contagem-nes/${contagemId}`);
+
+// CORREÇÃO: Função para salvar (definir) os alunos confirmados em uma contagem
+export const setAlunosContagemNes = (contagemId, alunosHasNecessidadesIds) => {
+    // Usando a rota que você especificou: PUT contagem-nes/{id}
+    return apiFetch(`/contagem-nes/${contagemId}`, { 
+        method: 'PUT', 
+        // O corpo espera um array de IDs
+        body: { alunos_has_necessidades_id: alunosHasNecessidadesIds } 
+    });
 };
-export const agendarRelacaoNosDias = (relacaoId, dias) => apiFetch(`/alunos/${relacaoId}/dias`, { method: 'POST', body: { dias } });

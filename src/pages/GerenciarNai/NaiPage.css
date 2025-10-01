@@ -4,20 +4,19 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  height: calc(94vh - 60px); 
   margin-top: 10vh;
-  height: calc(100vh - 60px); /* Ajusta a altura total da página ao tamanho da tela menos o header principal */
 }
 
-/* O container branco que envolve o conteúdo principal */
 .content-wrapper {
   background-color: #fff;
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  flex-grow: 1; /* Faz com que ele ocupe o espaço vertical disponível */
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Garante que o conteúdo não vaze das bordas arredondadas */
+  overflow: hidden;
 }
 
 .nai-header {
@@ -37,10 +36,13 @@
 
 .nai-grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  /* CORREÇÃO: Colunas de tamanho fixo, sem esticar */
+  grid-template-columns: repeat(auto-fit, 320px);
+  /* Centraliza os cards na grade para um visual mais limpo */
+  justify-content: center; 
   gap: 25px;
-  padding: 10px 5px; /* Adiciona um pequeno padding interno */
-  overflow-y: auto; /* Adiciona scroll se os cards ultrapassarem a altura */
+  padding: 10px 5px;
+  overflow-y: auto; /* Garante que o scroll seja vertical */
   flex-grow: 1;
 }
 
@@ -53,6 +55,7 @@
   flex-direction: column;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 360px;
 }
 .aluno-card-nai:hover {
   transform: translateY(-5px);
@@ -125,37 +128,49 @@
 }
 .action-button:hover { transform: translateY(-2px); }
 
-.action-button-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border: none;
-  border-radius: 50%;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.action-button-icon:hover { transform: translateY(-2px) scale(1.1); }
-
 .add-button { background-color: #28a745; }
 .add-button:hover { background-color: #218838; }
 
 .back-button { background-color: #333; }
 .back-button:hover { background-color: #555; }
 
-.download-button { background-color: #b81717;
-margin-bottom: 20px !important; }
-.download-button:hover { background-color: #961313; 
+.download-button { background-color: #8B0000; }
+.download-button:hover { background-color: #6a0000; }
+
+/* Estilo para os botões retangulares dentro do card */
+.aluno-card-nai .action-button-card {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  border: none;
+  gap: 8px;
+  transition: all 0.2s ease-in-out;
 }
 
-.edit-button { background-color: #ffc107; color: #212529; }
-.edit-button:hover { background-color: #e0a800; }
+.aluno-card-nai .action-button-card.edit-button-card { 
+  background-color: #ffc107;
+  color: #212529;
+}
+.aluno-card-nai .action-button-card.edit-button-card:hover {
+  background-color: #e0a800;
+  transform: translateY(-2px);
+}
 
-.delete-button { background-color: #dc3545; }
-.delete-button:hover { background-color: #c82333; }
+.aluno-card-nai .action-button-card.delete-button-card { 
+  background-color: #dc3545;
+}
+.aluno-card-nai .action-button-card.delete-button-card:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
 
 /* ========================================================= */
 /* ESTILOS PARA O MODAL (SweetAlert)                         */
@@ -164,16 +179,12 @@ margin-bottom: 20px !important; }
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-height: 70vh;
+  max-height: 60vh;
+  overflow-y: auto;
   padding: 10px 15px;
   text-align: left;
-  max-width: 100vw;
-
-  /* 👇 Aqui o que resolve teu problema */
-  overflow-y: auto;   /* permite scroll só vertical */
-  overflow-x: hidden; /* impede scroll horizontal */
+  overflow-x: hidden;
 }
-
 .swal-form-container .swal2-input,
 .swal-form-container .swal2-select,
 .swal-form-container .swal2-file {
@@ -184,25 +195,17 @@ margin-bottom: 20px !important; }
   font-size: 1em;
   box-sizing: border-box;
   margin: 0 !important;
-}
 
+}
 .swal-form-container .swal2-input{
   min-width: 100%;
-  padding: 12px 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 1em;
-  box-sizing: border-box;
-  margin: 0 !important;
 
 }
-
 .swal2-select { height: auto; }
 .swal2-file-label { font-size: 0.9em; color: #555; margin: 0; margin-bottom: -5px; display: block; }
 .swal2-file { border: none; padding-left: 0; }
 
 .swal2-textarea {
-    margin-left: 0%;
     width: 100% !important;
     box-sizing: border-box;
     border: 1px solid #ddd;
@@ -213,46 +216,5 @@ margin-bottom: 20px !important; }
     margin-top: 10px !important;
     resize: vertical;
     font-family: inherit;
-}
-
-
-.card-actions {
-  display: flex; /* Mantém o flexbox */
-  gap: 10px;    /* Espaçamento entre os botões */
-  padding: 15px 20px;
-  background-color: #fff;
-  border-top: 1px solid #eee;
-}
-
-/* NOVO: Estilo para os botões dentro do card */
-.aluno-card-nai .action-button-card { /* Nova classe para diferenciar dos outros botões de ícone */
-  flex: 1; /* Faz com que o botão ocupe o espaço disponível igualmente */
-  height: 40px; /* Altura fixa para um visual consistente */
-  border-radius: 8px; /* Bordas arredondadas, não mais 50% */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  font-weight: 600;
-  color: white; /* Cor do texto/ícone branca por padrão */
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-/* Atualize os estilos de cor para os botões de EDITAR e DELETAR dentro do card */
-.aluno-card-nai .action-button-card.edit-button-card { 
-  background-color: #ffc107; /* Amarelo */
-  color: #212529; /* Texto escuro para contraste */
-}
-.aluno-card-nai .action-button-card.edit-button-card:hover {
-  background-color: #e0a800; /* Amarelo mais escuro no hover */
-  transform: translateY(-2px);
-}
-
-.aluno-card-nai .action-button-card.delete-button-card { 
-  background-color: #dc3545; /* Vermelho */
-}
-.aluno-card-nai .action-button-card.delete-button-card:hover {
-  background-color: #c82333; /* Vermelho mais escuro no hover */
-  transform: translateY(-2px);
+    margin-left: 0px;
 }
