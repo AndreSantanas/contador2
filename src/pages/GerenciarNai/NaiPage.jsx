@@ -210,8 +210,12 @@ const NaiPage = () => {
                                 <p className="card-description-text">{aluno.descricao || 'Nenhuma descrição fornecida.'}</p>
                             </div>
                             <div className="card-actions">
-                                <button className="action-button-icon edit-button" title="Editar" onClick={() => handleOpenModal(aluno)}><i className="bi bi-pencil-fill"></i></button>
-                                <button className="action-button-icon delete-button" title="Deletar" onClick={() => handleDelete(aluno.id)}><i className="bi bi-trash-fill"></i></button>
+                                <button className="action-button-card edit-button-card" title="Editar" onClick={() => handleOpenModal(aluno)}>
+                                    <i className="bi bi-pencil-fill"></i> Editar
+                                </button>
+                                <button className="action-button-card delete-button-card" title="Deletar" onClick={() => handleDelete(aluno.id)}>
+                                    <i className="bi bi-trash-fill"></i> Deletar
+                                </button>
                             </div>
                         </div>
                     )) : (

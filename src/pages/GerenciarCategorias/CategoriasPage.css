@@ -6,7 +6,6 @@
   width: 100%;
   max-width: 1000px;
   color: #333;
-  margin-top: 70px;
 }
 
 .categorias-header {
@@ -24,8 +23,8 @@
 }
 
 .table-wrapper {
-  overflow-x: auto;
-  max-height: 45vh;
+  overflow-x: auto; 
+  max-height: 60vh; 
   overflow-y: auto;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -34,6 +33,7 @@
 .categorias-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed; 
 }
 
 .categorias-table th, .categorias-table td {
@@ -41,7 +41,13 @@
   text-align: left;
   border-bottom: 1px solid #ddd;
   vertical-align: middle;
+  word-wrap: break-word; 
 }
+
+/* Define a largura de cada coluna */
+.categorias-table th:nth-child(1) { width: 45%; } /* Coluna Nome */
+.categorias-table th:nth-child(2) { width: 40%; } /* Coluna Turmas */
+.categorias-table th:nth-child(3) { width: 15%; } /* Coluna Ações */
 
 .categorias-table thead {
   background-color: #8B0000;
@@ -56,7 +62,6 @@
 }
 
 .coluna-acoes {
-  width: 150px;
   text-align: center;
 }
 
@@ -68,18 +73,17 @@
 
 .turmas-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap; 
   gap: 5px;
 }
 
-/* PALETA DE CORES PARA BADGES DE TURMA */
 .turma-badge {
   color: white;
   padding: 5px 12px;
   border-radius: 15px;
   font-size: 0.85rem;
   font-weight: 600;
-  white-space: nowrap;
+  white-space: normal; 
   text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
 }
 .turma-badge-default { background-color: #6c757d; }
@@ -119,33 +123,16 @@
   color: #007bff;
   border-radius: 4px;
 }
+.pagination-button:hover:not(:disabled) { background-color: #e9ecef; }
+.pagination-button.active { background-color: #007bff; color: white; border-color: #007bff; cursor: default; }
+.pagination-button.disabled { color: #6c757d; cursor: not-allowed; background-color: #e9ecef; }
 
-.pagination-button:hover:not(:disabled) {
-  background-color: #e9ecef;
-}
 
-.pagination-button.active {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-  cursor: default;
-}
-
-.pagination-button.disabled {
-  color: #6c757d;
-  cursor: not-allowed;
-  background-color: #e9ecef;
-}
-
-/* ========================================================= */
-/* CORREÇÃO PARA AFASTAR O BOTÃO VOLTAR                      */
-/* ========================================================= */
 .categorias-footer {
-  margin-top: 30px; /* Aumentamos a margem de 20px para 30px */
+  margin-top: 30px;
   display: flex;
   justify-content: flex-start;
 }
-/* ========================================================= */
 
 .action-button {
   display: inline-flex;

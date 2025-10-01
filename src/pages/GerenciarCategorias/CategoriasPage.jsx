@@ -7,14 +7,13 @@ import './CategoriasPage.css';
 // Função para escolher a cor do badge da turma
 const getTurmaBadgeClass = (nomeTurma) => {
   if (!nomeTurma || typeof nomeTurma !== 'string') {
-    return 'turma-badge-default'; // Retorna cor padrão se o nome for inválido
+    return 'turma-badge-default';
   }
   const firstChar = nomeTurma.trim().charAt(0);
-  // Verifica se o primeiro caractere é um número de 1 a 9
   if (!isNaN(firstChar) && firstChar >= '1' && firstChar <= '9') {
     return `turma-badge-${firstChar}`;
   }
-  return 'turma-badge-default'; // Cor padrão para nomes que não começam com número
+  return 'turma-badge-default';
 };
 
 const CategoriasPage = () => {
@@ -26,16 +25,13 @@ const CategoriasPage = () => {
   const fetchData = async (page = 1) => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        navigate('/');
-        return;
-      }
-      const data = await getCategorias(token, page);
+      const data = await getCategorias(page);
       setCategorias(data.data || []);
       setPagination(data.meta);
     } catch (error) {
-      Swal.fire('Erro!', 'Não foi possível carregar as categorias.', 'error');
+      if (error && !error.message.includes('Sessão expirada')) {
+        Swal.fire('Erro!', 'Não foi possível carregar as categorias.', 'error');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -56,24 +52,19 @@ const CategoriasPage = () => {
       confirmButtonColor: '#28a745',
       cancelButtonText: 'Cancelar',
       cancelButtonColor: '#d33',
-      inputValidator: (value) => {
-        if (!value) {
-          return 'Você precisa digitar um nome para a categoria!';
-        }
-      }
+      inputValidator: (value) => !value && 'Você precisa digitar um nome para a categoria!'
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const token = localStorage.getItem('authToken');
         try {
           if (item) {
-            await updateCategoria(item.id, result.value, token);
+            await updateCategoria(item.id, result.value);
           } else {
-            await addCategoria(result.value, token);
+            await addCategoria(result.value);
           }
-          Swal.fire('Sucesso!', 'Categoria salva com sucesso!', 'success');
+          await Swal.fire({icon: 'success', title: 'Sucesso!', text: 'Categoria salva com sucesso.', timer: 1500, showConfirmButton: false});
           fetchData(pagination?.current_page || 1);
         } catch (error) {
-          Swal.fire('Erro!', 'Não foi possível salvar a categoria.', 'error');
+          if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível salvar a categoria.', 'error');
         }
       }
     });
@@ -92,12 +83,11 @@ const CategoriasPage = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const token = localStorage.getItem('authToken');
-          await deleteCategoria(id, token);
-          Swal.fire('Deletado!', 'A categoria foi removida.', 'success');
+          await deleteCategoria(id);
+          await Swal.fire({icon: 'success', title: 'Deletado!', text: 'A categoria foi removida.', timer: 1500, showConfirmButton: false});
           fetchData(pagination?.current_page || 1);
         } catch (error) {
-          Swal.fire('Erro!', 'Não foi possível deletar a categoria.', 'error');
+          if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível deletar a categoria.', 'error');
         }
       }
     });
@@ -129,14 +119,15 @@ const CategoriasPage = () => {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan="3" style={{textAlign: 'center'}}>Carregando...</td></tr>
+              <tr><td colSpan="3" style={{textAlign: 'center', padding: '40px'}}>Carregando...</td></tr>
             ) : categorias.length > 0 ? (
               categorias.map(cat => (
                 <tr key={cat.id}>
                   <td>{cat.nome_categoria}</td>
-                  <td>
+                  {/* CLASSE ADICIONADA AQUI para a quebra de linha funcionar */}
+                  <td className="coluna-turmas">
                     <div className="turmas-list">
-                      {cat.turmas.length > 0 ? (
+                      {(cat.turmas && cat.turmas.length > 0) ? (
                         cat.turmas.map(turma => (
                           <span key={turma.id} className={`turma-badge ${getTurmaBadgeClass(turma.nome_turma)}`}>
                             {turma.nome_turma}
@@ -158,7 +149,7 @@ const CategoriasPage = () => {
                 </tr>
               ))
             ) : (
-              <tr><td colSpan="3" style={{textAlign: 'center'}}>Nenhuma categoria encontrada.</td></tr>
+              <tr><td colSpan="3" style={{textAlign: 'center', padding: '40px'}}>Nenhuma categoria encontrada.</td></tr>
             )}
           </tbody>
         </table>

@@ -43,6 +43,15 @@
   word-wrap: break-word;
 }
 
+/* Define a largura de cada coluna para um layout estável */
+.alunos-table th:nth-child(1) { width: 35%; } /* Nome */
+.alunos-table th:nth-child(2) { width: 10%; } /* RM */
+.alunos-table th:nth-child(3) { width: 15%; } /* Nascimento */
+.alunos-table th:nth-child(4) { width: 15%; } /* Turma */
+.alunos-table th:nth-child(5) { width: 10%; } /* Gênero */
+.alunos-table th:nth-child(6) { width: 15%; } /* Ações */
+
+
 .alunos-table thead {
   background-color: #8B0000;
   color: white;
@@ -55,22 +64,7 @@
   background-color: #f5f5f5;
 }
 
-.coluna-foto {
-  width: 80px;
-  text-align: center;
-}
-
-.aluno-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ddd;
-  background-color: #f0f0f0;
-}
-
 .coluna-acoes {
-  width: 150px;
   text-align: center;
 }
 
@@ -97,28 +91,15 @@
   color: #007bff;
   border-radius: 4px;
 }
-
-.pagination-button:hover:not(:disabled) {
-  background-color: #e9ecef;
-}
-
-.pagination-button.active {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-  cursor: default;
-}
-
-.pagination-button.disabled {
-  color: #6c757d;
-  cursor: not-allowed;
-  background-color: #e9ecef;
-}
+.pagination-button:hover:not(:disabled) { background-color: #e9ecef; }
+.pagination-button.active { background-color: #007bff; color: white; border-color: #007bff; cursor: default; }
+.pagination-button.disabled { color: #6c757d; cursor: not-allowed; background-color: #e9ecef; }
 
 .alunos-footer {
   margin-top: 20px;
   display: flex;
   justify-content: flex-start;
+  margin-top: 40px 
 }
 
 /* Estilos de botões reutilizados */
@@ -139,7 +120,8 @@
 .action-button:hover { transform: translateY(-2px); }
 .add-button { background-color: #28a745; }
 .add-button:hover { background-color: #218838; }
-.back-button { background-color: #333; }
+.back-button { background-color: #333; 
+margin-top: 10px !important;}
 .back-button:hover { background-color: #555; }
 
 .edit-button, .delete-button {
@@ -148,8 +130,7 @@
   flex-grow: 1;
   justify-content: center;
 }
-.edit-button { background-color: #ffc107; color: #333; 
-min-height: 60px;}
+.edit-button { background-color: #ffc107; color: #333; }
 .edit-button:hover { background-color: #e0a800; }
 .delete-button { background-color: #dc3545; }
 .delete-button:hover { background-color: #c82333; }
@@ -166,8 +147,7 @@ min-height: 60px;}
   text-align: left;
 }
 .swal-form-container .swal2-input,
-.swal-form-container .swal2-select,
-.swal-form-container .swal2-file {
+.swal-form-container .swal2-select {
   width: 100%;
   padding: 12px 10px;
   border: 1px solid #ddd;
@@ -177,5 +157,3 @@ min-height: 60px;}
   margin: 0 !important;
 }
 .swal2-select { height: auto; }
-.swal2-file-label { font-size: 0.9em; color: #555; margin: 0; margin-bottom: -5px; display: block; }
-.swal2-file { border: none; padding-left: 0; }
