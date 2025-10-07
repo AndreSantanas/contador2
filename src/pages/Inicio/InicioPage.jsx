@@ -40,21 +40,6 @@ const InicioPage = ({ userRole }) => {
         ))}
       </div>
 
-      {/* ========================================================= */}
-      {/* BOTÃO DE VOLTAR ADICIONADO APENAS PARA A NUTRICIONISTA   */}
-      {/* ========================================================= */}
-      <div className="inicio-footer">
-        {userRole === 'nutri' && (
-          <button 
-            className="action-button back-button" 
-            // Supondo que o dashboard principal da nutri seja em /nutri/dashboard
-            // Se for apenas para voltar na história, use navigate(-1)
-            onClick={() => navigate('/nutri/dashboard')} 
-          >
-            <i className="bi bi-arrow-left"></i> Voltar para Dashboard
-          </button>
-        )}
-      </div>
     </section>
   );
 };

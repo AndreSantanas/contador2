@@ -220,11 +220,6 @@ const CronogramaPage = () => {
                     </div>
                 </div>
             </DragDropContext>
-            <div className="cronograma-footer">
-                <button className="action-button back-button" onClick={() => navigate(-1)}>
-                    <i className="bi bi-arrow-left"></i> Voltar
-                </button>
-            </div>
         </section>
     );
 };

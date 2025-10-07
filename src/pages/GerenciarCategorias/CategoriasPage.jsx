@@ -1,181 +1,289 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2/dist/sweetalert2.all.min.js';
-import { getCategorias, addCategoria, updateCategoria, deleteCategoria } from '../../services/api';
+import { getTurmas, addTurma, updateTurma, deleteTurma, getCategorias, addCategoria, updateCategoria, deleteCategoria } from '../../services/api';
 import './CategoriasPage.css';
 
-// Função para escolher a cor do badge da turma
-const getTurmaBadgeClass = (nomeTurma) => {
-  if (!nomeTurma || typeof nomeTurma !== 'string') {
-    return 'turma-badge-default';
-  }
-  const firstChar = nomeTurma.trim().charAt(0);
-  if (!isNaN(firstChar) && firstChar >= '1' && firstChar <= '9') {
-    return `turma-badge-${firstChar}`;
-  }
-  return 'turma-badge-default';
+// Função para escolher a cor do badge de forma consistente
+const getBadgeColorClass = (categoriaId) => {
+    if (!categoriaId) return 'badge-color-undefined';
+    const numeroDeCores = 5;
+    const corIndex = categoriaId % numeroDeCores;
+    return `badge-color-${corIndex}`;
 };
 
 const CategoriasPage = () => {
-  const [categorias, setCategorias] = useState([]);
-  const [pagination, setPagination] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+    const [turmas, setTurmas] = useState([]);
+    const [categorias, setCategorias] = useState([]);
+    const [selectedCategoriaId, setSelectedCategoriaId] = useState('all');
+    const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
 
-  const fetchData = async (page = 1) => {
-    try {
-      setIsLoading(true);
-      const data = await getCategorias(page);
-      setCategorias(data.data || []);
-      setPagination(data.meta);
-    } catch (error) {
-      if (error && !error.message.includes('Sessão expirada')) {
-        Swal.fire('Erro!', 'Não foi possível carregar as categorias.', 'error');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleOpenModal = (item = null) => {
-    Swal.fire({
-      title: item ? 'Editar Categoria' : 'Adicionar Nova Categoria',
-      input: 'text',
-      inputValue: item ? item.nome_categoria : '',
-      inputPlaceholder: 'Nome da Categoria',
-      showCancelButton: true,
-      confirmButtonText: 'Salvar',
-      confirmButtonColor: '#28a745',
-      cancelButtonText: 'Cancelar',
-      cancelButtonColor: '#d33',
-      inputValidator: (value) => !value && 'Você precisa digitar um nome para a categoria!'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
+    const fetchData = useCallback(async () => {
         try {
-          if (item) {
-            await updateCategoria(item.id, result.value);
-          } else {
-            await addCategoria(result.value);
-          }
-          await Swal.fire({icon: 'success', title: 'Sucesso!', text: 'Categoria salva com sucesso.', timer: 1500, showConfirmButton: false});
-          fetchData(pagination?.current_page || 1);
+            setIsLoading(true);
+            const [turmasData, categoriasData] = await Promise.all([
+                getTurmas(1, 1000), // Pega todas as turmas
+                getCategorias(1, 100) // Pega todas as categorias
+            ]);
+            setTurmas(turmasData.data || []);
+            setCategorias(categoriasData.data || []);
         } catch (error) {
-          if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível salvar a categoria.', 'error');
+            if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível carregar os dados.', 'error');
+        } finally {
+            setIsLoading(false);
         }
-      }
-    });
-  };
+    }, []);
 
-  const handleDelete = (id) => {
-    Swal.fire({
-      title: 'Tem certeza?',
-      text: "Isso pode afetar turmas associadas!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Sim, deletar!',
-      cancelButtonText: 'Cancelar',
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await deleteCategoria(id);
-          await Swal.fire({icon: 'success', title: 'Deletado!', text: 'A categoria foi removida.', timer: 1500, showConfirmButton: false});
-          fetchData(pagination?.current_page || 1);
-        } catch (error) {
-          if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível deletar a categoria.', 'error');
+    useEffect(() => { fetchData(); }, [fetchData]);
+
+    const filteredTurmas = useMemo(() => {
+        if (selectedCategoriaId === 'all') {
+            return turmas;
         }
-      }
-    });
-  };
+        return turmas.filter(turma => turma.categorias_id === selectedCategoriaId);
+    }, [selectedCategoriaId, turmas]);
 
-  const handlePageChange = (page) => {
-    if (page) {
-      fetchData(page);
-    }
-  };
+    const nomeDaVisao = useMemo(() => {
+        if (selectedCategoriaId === 'all') return 'Todas as Turmas';
+        return `Turmas de: ${categorias.find(cat => cat.id === selectedCategoriaId)?.nome_categoria || ''}`;
+    }, [selectedCategoriaId, categorias]);
+    
+    // Handlers para Categorias
+    const handleAddCategoria = async () => {
+        const { value: nome } = await Swal.fire({
+            title: 'Adicionar Nova Categoria',
+            input: 'text',
+            inputPlaceholder: 'Nome da Categoria',
+            showCancelButton: true,
+            confirmButtonText: 'Salvar',
+            confirmButtonColor: '#28a745',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (value) => !value && 'Você precisa digitar um nome!'
+        });
+        if (nome) {
+            try {
+                await addCategoria(nome);
+                await Swal.fire({icon: 'success', title: 'Sucesso!', text: 'Categoria salva.', timer: 1500, showConfirmButton: false});
+                fetchData();
+            } catch (error) {
+                if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível salvar a categoria.', 'error');
+            }
+        }
+    };
 
-  return (
-    <section className="categorias-container">
-      <div className="categorias-header">
-        <h1>Gerenciar Categorias</h1>
-        <button className="action-button add-button" onClick={() => handleOpenModal()}>
-          <i className="bi bi-plus"></i> Adicionar Categoria
-        </button>
-      </div>
+    const handleEditCategoria = async (cat) => {
+        const { value: nome } = await Swal.fire({
+            title: 'Editar Categoria',
+            input: 'text',
+            inputValue: cat.nome_categoria,
+            inputPlaceholder: 'Nome da Categoria',
+            showCancelButton: true,
+            confirmButtonText: 'Salvar',
+            confirmButtonColor: '#28a745',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (value) => !value && 'O nome não pode ser vazio!'
+        });
+        if (nome) {
+            try {
+                await updateCategoria(cat.id, nome);
+                await Swal.fire({icon: 'success', title: 'Sucesso!', text: 'Categoria atualizada.', timer: 1500, showConfirmButton: false});
+                fetchData();
+            } catch (error) {
+                if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível atualizar a categoria.', 'error');
+            }
+        }
+    };
 
-      <div className="table-wrapper">
-        <table className="categorias-table">
-          <thead>
-            <tr>
-              <th>Nome da Categoria</th>
-              <th>Turmas Vinculadas</th>
-              <th className="coluna-acoes">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr><td colSpan="3" style={{textAlign: 'center', padding: '40px'}}>Carregando...</td></tr>
-            ) : categorias.length > 0 ? (
-              categorias.map(cat => (
-                <tr key={cat.id}>
-                  <td>{cat.nome_categoria}</td>
-                  {/* CLASSE ADICIONADA AQUI para a quebra de linha funcionar */}
-                  <td className="coluna-turmas">
-                    <div className="turmas-list">
-                      {(cat.turmas && cat.turmas.length > 0) ? (
-                        cat.turmas.map(turma => (
-                          <span key={turma.id} className={`turma-badge ${getTurmaBadgeClass(turma.nome_turma)}`}>
-                            {turma.nome_turma}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="no-turma-badge">Nenhuma turma</span>
-                      )}
+    const handleDeleteCategoria = async (cat) => {
+        const result = await Swal.fire({
+            title: 'Tem certeza?',
+            html: `Isso removerá a categoria "<strong>${cat.nome_categoria}</strong>" e pode afetar turmas associadas!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Sim, deletar!',
+            cancelButtonText: 'Cancelar',
+        });
+        if (result.isConfirmed) {
+            try {
+                await deleteCategoria(cat.id);
+                await Swal.fire({icon: 'success', title: 'Deletado!', text: 'A categoria foi removida.', timer: 1500, showConfirmButton: false});
+                if (selectedCategoriaId === cat.id) setSelectedCategoriaId('all');
+                fetchData();
+            } catch (error) {
+                if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível deletar a categoria.', 'error');
+            }
+        }
+    };
+    
+    // Handlers para Turmas
+    const handleAddTurma = async () => {
+        const optionsHtml = categorias.map(cat => `<option value="${cat.id}">${cat.nome_categoria}</option>`).join('');
+        const { value: formValues } = await Swal.fire({
+            title: 'Adicionar Nova Turma',
+            html: `
+                <input id="swal-nome" class="swal2-input" placeholder="Nome da Turma">
+                <select id="swal-categoria" class="swal2-select">
+                    <option value="">Selecione uma Categoria</option>
+                    ${optionsHtml}
+                </select>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Salvar',
+            confirmButtonColor: '#28a745',
+            preConfirm: () => {
+                const nome = document.getElementById('swal-nome').value;
+                const categoriaId = document.getElementById('swal-categoria').value;
+                if (!nome || !categoriaId) {
+                    Swal.showValidationMessage('Nome da turma e categoria são obrigatórios!');
+                    return false;
+                }
+                return { nome_turma: nome, categorias_id: categoriaId };
+            }
+        });
+        if (formValues) {
+            try {
+                await addTurma(formValues);
+                await Swal.fire('Sucesso!', 'Turma salva com sucesso!', 'success');
+                fetchData();
+            } catch (error) {
+                if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível salvar a turma.', 'error');
+            }
+        }
+    };
+
+    const handleEditTurma = async (turma) => {
+        const optionsHtml = categorias.map(cat => `<option value="${cat.id}" ${turma.categorias_id == cat.id ? 'selected' : ''}>${cat.nome_categoria}</option>`).join('');
+        const { value: formValues } = await Swal.fire({
+            title: 'Editar Turma',
+            html: `
+                <input id="swal-nome" class="swal2-input" placeholder="Nome da Turma" value="${turma.nome_turma}">
+                <select id="swal-categoria" class="swal2-select">
+                    <option value="">Selecione uma Categoria</option>
+                    ${optionsHtml}
+                </select>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Salvar',
+            confirmButtonColor: '#28a745',
+            preConfirm: () => {
+                const nome = document.getElementById('swal-nome').value;
+                const categoriaId = document.getElementById('swal-categoria').value;
+                if (!nome || !categoriaId) {
+                    Swal.showValidationMessage('Nome da turma e categoria são obrigatórios!');
+                    return false;
+                }
+                return { nome_turma: nome, categorias_id: categoriaId };
+            }
+        });
+        if (formValues) {
+            try {
+                await updateTurma(turma.id, formValues);
+                await Swal.fire('Sucesso!', 'Turma atualizada com sucesso!', 'success');
+                fetchData();
+            } catch (error) {
+                if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível atualizar a turma.', 'error');
+            }
+        }
+    };
+
+    const handleDeleteTurma = async (id) => {
+        const result = await Swal.fire({
+            title: 'Tem certeza?',
+            text: "Esta ação não pode ser revertida!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Sim, deletar!',
+        });
+        if (result.isConfirmed) {
+            try {
+                await deleteTurma(id);
+                await Swal.fire('Deletado!', 'A turma foi removida.', 'success');
+                fetchData();
+            } catch (error) {
+                if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível deletar a turma.', 'error');
+            }
+        }
+    };
+
+    return (
+        <section className="estrutura-container">
+            
+            <div className="panel-lateral panel-categorias">
+                <div className="panel-header">
+                    <h3>Categorias</h3>
+                    <button className="add-button-small" onClick={handleAddCategoria} title="Criar Nova Categoria">+</button>
+                </div>
+                <div className="list-container">
+                    <div className={`list-item-container ${selectedCategoriaId === 'all' ? 'active' : ''}`} onClick={() => setSelectedCategoriaId('all')}>
+                        <span className="list-item-name">Ver Todas as Turmas</span>
                     </div>
-                  </td>
-                  <td className="coluna-acoes actions-cell">
-                    <button className="action-button edit-button" title="Editar" onClick={() => handleOpenModal(cat)}>
-                      <i className="bi bi-pencil-fill"></i>
-                    </button>
-                    <button className="action-button delete-button" title="Deletar" onClick={() => handleDelete(cat.id)}>
-                      <i className="bi bi-trash-fill"></i>
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr><td colSpan="3" style={{textAlign: 'center', padding: '40px'}}>Nenhuma categoria encontrada.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                    {isLoading ? <p style={{padding: '10px'}}>Carregando...</p> : categorias.map(cat => (
+                        <div key={cat.id} className={`list-item-container ${selectedCategoriaId === cat.id ? 'active' : ''}`} onClick={() => setSelectedCategoriaId(cat.id)}>
+                            <span className="list-item-name">{cat.nome_categoria}</span>
+                            <div className="list-item-actions">
+                                <button title="Editar" onClick={(e) => { e.stopPropagation(); handleEditCategoria(cat); }}><i className="bi bi-pencil-fill"></i></button>
+                                <button title="Excluir" onClick={(e) => { e.stopPropagation(); handleDeleteCategoria(cat); }}><i className="bi bi-trash-fill"></i></button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
-      {pagination && pagination.last_page > 1 && (
-        <div className="pagination-container">
-          {pagination.links.map((link, index) => (
-            <button
-              key={index}
-              className={`pagination-button ${link.active ? 'active' : ''} ${!link.page ? 'disabled' : ''}`}
-              onClick={() => handlePageChange(link.page)}
-              dangerouslySetInnerHTML={{ __html: link.label }}
-              disabled={!link.page}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="categorias-footer">
-        <button className="action-button back-button" onClick={() => navigate(-1)}>
-          <i className="bi bi-arrow-left"></i> Voltar
-        </button>
-      </div>
-    </section>
-  );
+            <div className="panel-central panel-turmas">
+                <div className="panel-header">
+                    <h3>{nomeDaVisao}</h3>
+                    <button className="action-button add-button" onClick={handleAddTurma}>
+                        <i className="bi bi-plus"></i> Adicionar Turma
+                    </button>
+                </div>
+                <div className="table-wrapper-turmas">
+                    <table className="turmas-table">
+                        <thead>
+                            <tr>
+                                <th>Nome da Turma</th>
+                                <th>Categoria</th>
+                                <th className="coluna-acoes">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {isLoading ? (
+                                <tr><td colSpan="3" style={{textAlign: 'center', padding: '40px'}}>Carregando...</td></tr>
+                            ) : filteredTurmas.length > 0 ? filteredTurmas.map(turma => (
+                                <tr key={turma.id}>
+                                    <td>{turma.nome_turma}</td>
+                                    <td>
+                                        <span className={`categoria-badge ${getBadgeColorClass(turma.categoria?.id)}`}>
+                                            {turma.categoria?.nome_categoria || 'Não definida'}
+                                        </span>
+                                    </td>
+                                    <td className="coluna-acoes actions-cell">
+                                        <button className="action-button edit-button" title="Editar" onClick={() => handleEditTurma(turma)}>
+                                            <i className="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <button className="action-button delete-button" title="Deletar" onClick={() => handleDeleteTurma(turma.id)}>
+                                            <i className="bi bi-trash-fill"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr><td colSpan="3">
+                                    <div className="empty-state">
+                                        <i className="bi bi-search"></i>
+                                        <p>Nenhuma turma encontrada.</p>
+                                    </div>
+                                </td></tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    );
 };
 
 export default CategoriasPage;

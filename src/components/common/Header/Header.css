@@ -1,106 +1,219 @@
 .header {
     width: 100%;
-    min-height: 11vh; /* altura mínima para responsividade */
+    min-height: 9vh;
+    display: flex; /* USA FLEXBOX PARA O LAYOUT */
+    align-items: center; /* Alinha tudo verticalmente */
+    position: relative;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow: hidden; /* Garante que nada vaze */
+    z-index: 999;
+}
+
+/* Base para as 3 seções */
+.header-section {
+    height: 11vh;
     display: flex;
     align-items: center;
-    padding: 0 20px;
-    z-index: 100;
-    box-shadow: 7px 7px 7px #00000062;
 }
 
-
+/* Seção Esquerda (Vermelha) */
 .header-left {
-    background-color: #fff;
-    width: 20%;
-    height: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
+    background-color: #c00;
+    flex: 1; /* Ocupa o espaço restante */
+    padding: 0 20px;
+    justify-content: flex-start; /* Alinha o conteúdo à esquerda */
+    width: 40vw;
 }
 
+/* Seção Central (Branca) */
+.header-center {
+    background-color: #fff;
+    flex-shrink: 0; /* Impede que a seção encolha */
+    justify-content: center;
+    padding: 0 10px;
+    width: 25vw;
+}
+
+/* Seção Direita (Vermelha) */
 .header-right {
     background-color: #c00;
-    width: 80%;
-    height: 100%;
-    position: absolute;
-    right: 0;
-    top: 0;
+    flex: 1; /* Ocupa o espaço restante */
+    padding: 0 20px;
+    justify-content: flex-end; /* Alinha o conteúdo à direita */
+    gap: 20px;
 }
 
-.setas {
-    position: absolute;
-    left: 16%;
-    height: 100%;
-    z-index: 2;
+/* Botão de Voltar */
+.header-back-button {
+    background: none;
+    border: 3px solid rgba(255, 255, 255, 0.966);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 }
-.header {
-    z-index: 999; /* Muito acima */
-    position: relative;
-  }
-  
-.logo {
+.header-back-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Logos */
+.setas-flanco {
+    height: 11vh;
+    max-height: 80px;
+    z-index: 998;
+}
+
+.logo-principal {
     width: 220px;
     height: auto;
-    z-index: 10;
-    margin-left: 2px;
+    margin: 0 10px; /* Espaçamento entre as setas e a logo */
+}
+
+/* Menu Hamburger */
+.menu-hamburguer {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+}
+
+#iconeMenu {
+    font-size: 40px;
+    color: white;
+    display: inline-block;
+    transition: transform 0.3s ease-in-out;
+}
+
+#iconeMenu.girar {
+    transform: rotate(90deg);
+}
+
+/* Notificação (se existir) */
+.notificacao {
     position: relative;
 }
 
-.menu-hamburguer {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  right: 20px;
-  top: 10px;
-  width: 60px; 
-  height: 60px;
-  z-index: 9999;
-}
-
-
-/* ========================================================= */
-/* CSS DEFINITIVO PARA O ÍCONE E ANIMAÇÃO                    */
-/* ========================================================= */
-
-/* Alvo principal é o ID do ícone para garantir a aplicação do estilo */
-#iconeMenu {
-  font-size: 40px; 
-  color: white; 
-  display: inline-block; /* Garante que transformações funcionem */
-  transition: transform 0.3s ease-in-out; /* Animação suave */
-}
-
-/* Regra que aplica a rotação quando a classe 'girar' está presente NO ELEMENTO com o ID */
-#iconeMenu.girar {
-  transform: rotate(90deg); /* Gira o ícone em 90 graus */
-}
-/* Responsividade do Header */
+/* Responsividade */
 @media (max-width: 768px) {
-  .header {
+   .header {
+    width: 100%;
+    max-height: 9vh;
+    display: flex; /* USA FLEXBOX PARA O LAYOUT */
+    align-items: center; /* Alinha tudo verticalmente */
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow: hidden; /* Garante que nada vaze */
+    z-index: 999;
+    padding: -20px;
+}
+
+/* Base para as 3 seções */
+.header-section {
+    height: 11vh;
+    display: flex;
+    align-items: center;
+}
+
+/* Seção Esquerda (Vermelha) */
+.header-left {
+    background-color: #c00;
+    flex: 1; /* Ocupa o espaço restante */
     padding: 0 10px;
-    min-height: 60px;
-  }
-  .header-left { width: 45%; }
-  .header-right { width: 65%; }
-  .logo { width: 80px; margin-left: 0px; }
-  .setas { left: 20%; }
-  .menu-hamburguer {
-    right: 10px;
-    top: 10px;
-    width: auto;
+    justify-content: flex-start; /* Alinha o conteúdo à esquerda */
+    width: 22vw;
+}
+
+/* Seção Central (Branca) */
+.header-center {
+    background-color: #fff;
+    flex-shrink: 0; /* Impede que a seção encolha */
+    justify-content: center;
+    padding: 0 10px;
+    width: 48vw;
+}
+
+/* Seção Direita (Vermelha) */
+.header-right {
+    background-color: #c00;
+    flex: 1; /* Ocupa o espaço restante */
+    padding: 20px 10px;
+    justify-content: flex-end; /* Alinha o conteúdo à direita */
+    gap: 20px;
+    width: 28vw;
+}
+
+/* Botão de Voltar */
+.header-back-button {
+    background: none;
+    border: 3px solid rgba(255, 255, 255, 0.966);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.header-back-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Logos */
+.setas-flanco {
+    height: 9vh;
+    max-height: 80px;
+    z-index: 998;
+}
+
+.logo-principal {
+    width: 35vw;
     height: auto;
-  }
-  .menu-hamburguer i { font-size: 35px; }
-  #notificacao-badge {
-    width: 35px;
-    height: 35px;
-    font-size: 18px;
-    top: 12px;
-    right: 60px;
-  }
+    margin: 0 -10px; /* Espaçamento entre as setas e a logo */
+}
+
+/* Menu Hamburger */
+.menu-hamburguer {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    width: 60px;
+    align-items: end;
+}
+
+#iconeMenu {
+    font-size: 40px;
+    color: white;
+    display: inline-block;
+    transition: transform 0.3s ease-in-out;
+}
+
+#iconeMenu.girar {
+    transform: rotate(90deg);
+}
+
+/* Notificação (se existir) */
+.notificacao {
+    position: relative;
+}
 }

@@ -1,37 +1,56 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Header.css';
 
 import setas from '../../../assets/img/setas.png';
+import setas2 from '../../../assets/img/setas2.png'; // Nova imagem
 import logo from '../../../assets/img/menu.png';
 
 const Header = ({ onMenuClick, onLogoClick, userRole, isMenuOpen }) => {
-  // A classe 'girar' é adicionada condicionalmente aqui
-  const iconeClasses = `bi bi-list ${isMenuOpen ? 'girar' : ''}`;
+    const navigate = useNavigate();
+    const location = useLocation();
 
-  return (
-    <header className="header">
-      <div className="header-left"></div>
-      <img src={setas} alt="Setas" className="setas" />
-      <div className="header-right"></div>
-      <img 
-        src={logo} 
-        alt="Logo" 
-        className="logo" 
-        style={{ cursor: 'pointer' }} 
-        onClick={onLogoClick} 
-      />
-      <button className="menu-hamburguer" onClick={onMenuClick}>
-        {/* A variável com as classes dinâmicas é usada aqui */}
-        <i id="iconeMenu" className={iconeClasses}></i>
-      </button>
+    // O botão de voltar só aparece se não estivermos na página inicial (dashboard)
+    const showBackButton = location.pathname !== '/dashboard';
+    const iconeClasses = `bi bi-list ${isMenuOpen ? 'girar' : ''}`;
 
-      {userRole === 'inspetora' && (
-        <div className="notificacao">
-          <span id="notificacao-badge" style={{ display: 'none' }}></span>
-        </div>
-      )}
-    </header>
-  );
+    return (
+        <header className="header">
+            {/* Seção Esquerda (Vermelha) */}
+            <div className="header-section header-left">
+                {showBackButton && (
+                    <button className="header-back-button" onClick={() => navigate(-1)} title="Voltar">
+                        <i className="bi bi-arrow-left"></i>
+                    </button>
+                )}
+            </div>
+
+            {/* Seção Central (Branca com Logos) */}
+            <div className="header-section header-center">
+                <img src={setas} alt="Setas" className="setas-flanco" />
+                <img 
+                    src={logo} 
+                    alt="Logo" 
+                    className="logo-principal" 
+                    style={{ cursor: 'pointer' }} 
+                    onClick={onLogoClick} 
+                />
+                <img src={setas2} alt="Setas 2" className="setas-flanco" />
+            </div>
+
+            {/* Seção Direita (Vermelha) */}
+            <div className="header-section header-right">
+                {userRole === 'inspetora' && (
+                    <div className="notificacao">
+                        <span id="notificacao-badge" style={{ display: 'none' }}></span>
+                    </div>
+                )}
+                <button className="menu-hamburguer" onClick={onMenuClick}>
+                    <i id="iconeMenu" className={iconeClasses}></i>
+                </button>
+            </div>
+        </header>
+    );
 };
 
 export default Header;
