@@ -20,11 +20,11 @@ const apiFetch = async (endpoint, options = {}) => {
 
         if (response.status === 401) {
             localStorage.clear();
-            await Swal.fire({
-                title: 'Sessão Expirada',
-                text: 'Por favor, faça o login novamente.',
-                icon: 'warning',
-                confirmButtonColor: '#8B0000',
+            await Swal.fire({ 
+                title: 'Sessão Expirada', 
+                text: 'Por favor, faça o login novamente.', 
+                icon: 'warning', 
+                confirmButtonColor: '#8B0000' 
             });
             window.location.href = '/';
             throw new Error('Sessão expirada.');
@@ -35,14 +35,13 @@ const apiFetch = async (endpoint, options = {}) => {
             throw new Error(errorData.message || 'Ocorreu um erro na requisição.');
         }
 
-        if (response.status === 204) return { success: true }; // No Content
+        if (response.status === 204) return { success: true };
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
             return response.json();
         }
         return { success: true };
     } catch (error) {
-        // Lida com erros de rede (ex: servidor offline)
         console.error('API Fetch Error:', error);
         throw error;
     }
@@ -93,44 +92,43 @@ export const deleteAluno = (id) => apiFetch(`/alunos/${id}`, { method: 'DELETE' 
 
 // --- ASSOCIAÇÕES ---
 export const associarNecessidadesAoAluno = (alunoId, necessidadesIds) => {
-  return apiFetch(`/alunos/${alunoId}/necessidades`, { method: 'POST', body: { necessidades: necessidadesIds } });
+    return apiFetch(`/alunos/${alunoId}/necessidades`, { method: 'POST', body: { necessidades: necessidadesIds } });
 };
 export const desassociarAlunoDaNecessidade = (necessidadeId, alunoId) => {
-  return apiFetch(`/necessidade/${necessidadeId}/alunos`, { method: 'DELETE', body: { alunos: [alunoId] } });
+    return apiFetch(`/necessidade/${necessidadeId}/alunos`, { method: 'DELETE', body: { alunos: [alunoId] } });
 };
 
 // --- CRONOGRAMA ---
 export const getCronograma = () => apiFetch('/cronogramas');
 export const agendarRelacaoNosDias = (relacaoId, dias) => apiFetch(`/alunos/${relacaoId}/dias`, { method: 'POST', body: { dias } });
 export const removerAgendamentoDoDia = (relacaoId, diaId) => apiFetch(`/alunos/${relacaoId}/dias`, { method: 'DELETE', body: { dias: [diaId] } });
-
-
-
-
-// --- FUNÇÕES DE CONTAGEM (Versão Final) ---
-export const getContagensDeHoje = () => {
-  const hoje = new Date().toISOString().slice(0, 10);
-  return apiFetch(`/contagens?data=${hoje}`);
-};
-export const addContagem = (data) => apiFetch('/contagens', { method: 'POST', body: data });
-export const updateContagem = (id, data) => apiFetch(`/contagens/${id}`, { method: 'PUT', body: data });
-
-export const getAlunosContagemNes = (contagemId) => apiFetch(`/contagem-nes/${contagemId}`);
-
-export const addAlunoNaContagemNes = (alunoHasNecessidadeId) => {
-  return apiFetch(`/contagem-nes`, {
-      method: 'POST',
-      body: { alunos_has_necessidades_id: alunoHasNecessidadeId }
-  });
-};
-
-// CORREÇÃO DE SINTAXE APLICADA AQUI 👇
-export const removeAlunoDaContagemNes = (contagemNesId) => {
-  return apiFetch(`/contagem-nes/${contagemNesId}`, {
-      method: 'DELETE'
-  });
-};
-
-
-
 export const getDiasDaRelacao = (relacaoId) => apiFetch(`/alunos/${relacaoId}/dias`);
+
+// --- CONTAGEM ---
+export const getContagensDeHoje = () => {
+    const hoje = new Date().toISOString().slice(0, 10);
+    return apiFetch(`/contagens?data=${hoje}`);
+};
+export const addContagem = (data) => {
+    const body = { qtd_contagem: data.quantidade, turmas_id: data.turmaId };
+    return apiFetch('/contagens', { method: 'POST', body });
+};
+export const updateContagem = (id, data) => {
+    const body = { qtd_contagem: data.quantidade };
+    return apiFetch(`/contagens/${id}`, { method: 'PUT', body });
+};
+
+// --- CONTAGEM NECESSIDADES (NES) ---
+export const getAlunosContagemNes = () => apiFetch('/contagem-nes');
+export const addAlunoNaContagemNes = (contagemId, alunoHasNecessidadeId) => {
+    return apiFetch(`/contagem-nes`, {
+        method: 'POST',
+        body: {
+            contagem_id: contagemId,
+            alunos_has_necessidades_id: alunoHasNecessidadeId
+        }
+    });
+};
+export const removeAlunoDaContagemNes = (contagemNesId) => {
+    return apiFetch(`/contagem-nes/${contagemNesId}`, { method: 'DELETE' });
+};

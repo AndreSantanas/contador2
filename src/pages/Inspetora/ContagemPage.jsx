@@ -1,262 +1,375 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Swal from 'sweetalert2/dist/sweetalert2.all.min.js';
-import { 
-    getTurmas, getCronograma, getContagensDeHoje, getAlunos, getNecessidades, getNecessidadeComAlunos,
-    addContagem, updateContagem, getAlunosContagemNes, addAlunoNaContagemNes, removeAlunoDaContagemNes
+import {
+    getTurmas,
+    getContagensDeHoje,
+    getNecessidades,
+    getNecessidadeComAlunos,
+    getCronograma,
+    addContagem,
+    updateContagem,
+    getAlunosContagemNes,
+    addAlunoNaContagemNes,
+    removeAlunoDaContagemNes
 } from '../../services/api';
 import { PUBLIC_STORAGE_URL } from '../../config/apiConfig';
 import placeholderAvatar from '../../assets/img/avatar.png';
-import './ContagemPage.css';
+import './ContagemPage.css'; // Importa o novo CSS
 
 const ContagemPage = () => {
+    // Estados do componente (sem alterações)
     const [turmas, setTurmas] = useState([]);
-    const [contagens, setContagens] = useState({});
-    const [alunosComRestricao, setAlunosComRestricao] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const navigate = useNavigate();
+    const [contagens, setContagens] = useState([]);
+    const [necessidades, setNecessidades] = useState([]);
+    const [alunosNesDeHoje, setAlunosNesDeHoje] = useState([]); 
+    const [idsAlunosNoCronograma, setIdsAlunosNoCronograma] = useState(new Set());
+    const [loading, setLoading] = useState(true);
+    const hoje = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
-    const diaDaSemanaMap = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-
-    const fetchData = async () => {
+    // Função para carregar dados iniciais ou re-sincronizar
+    const carregarDados = useCallback(async (showLoading = true) => {
+        if (showLoading) setLoading(true);
         try {
-            setIsLoading(true);
-            const [turmasData, cronogramaData, contagensData, alunosData, necessidadesData] = await Promise.all([
-                getTurmas(1, 100), getCronograma(), getContagensDeHoje(),
-                getAlunos(1, 1000), getNecessidades(1, 100)
+            const [turmasRes, contagensRes, necessidadesRes, cronogramaRes, alunosNesRes] = await Promise.all([
+                getTurmas(),
+                getContagensDeHoje(),
+                getNecessidades(),
+                getCronograma(),
+                getAlunosContagemNes() // Pega TODOS os registros NES do dia
             ]);
 
-            setTurmas(turmasData.data || []);
-            const contagensMap = (contagensData.data || []).reduce((map, contagem) => {
-                map[contagem.turmas_id] = contagem;
-                return map;
-            }, {});
-            setContagens(contagensMap);
+            setTurmas(turmasRes.data || []);
+            setContagens(contagensRes.data || []);
+            setNecessidades(necessidadesRes.data || []);
+            // A API retorna o formato: { id: 115, aluno: { id: 5, nome: '...' } }
+            setAlunosNesDeHoje(alunosNesRes.data || []); 
 
-            const todosAlunos = alunosData.data || [];
-            const listaNecessidades = necessidadesData.data || [];
-
-            const relationLookupMap = new Map();
-            const necessidadesComAlunos = await Promise.all(listaNecessidades.map(nec => getNecessidadeComAlunos(nec.id)));
-            
-            necessidadesComAlunos.forEach(nec => {
-                (nec.alunos || []).forEach(aluno => {
-                    const relacaoId = aluno.pivot?.id;
-                    if (relacaoId) {
-                        relationLookupMap.set(`aluno${aluno.id}-nec${nec.id}`, relacaoId);
-                    }
-                });
-            });
-
-            const alunosParaHoje = new Map();
-            
-            const necessidadeNai = necessidadesComAlunos.find(n => n.necessidade.toUpperCase() === 'NAI');
-            if (necessidadeNai && necessidadeNai.alunos) {
-                necessidadeNai.alunos.forEach(alunoNai => {
-                    const alunoCompleto = todosAlunos.find(a => a.id === alunoNai.id);
-                    const idDaJuncao = relationLookupMap.get(`aluno${alunoNai.id}-nec${necessidadeNai.id}`);
-                    if (alunoCompleto && idDaJuncao) {
-                        alunosParaHoje.set(idDaJuncao, {
-                            alunoId: alunoCompleto.id, nome: alunoCompleto.nome, foto: alunoCompleto.foto,
-                            turmas_id: alunoCompleto.turmas_id, necessidade: "NAI",
-                            alunosHasNecessidadesId: idDaJuncao,
-                        });
-                    }
-                });
-            }
-
+            const diasDaSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
             const hojeIndex = new Date().getDay();
-            const diaAtual = cronogramaData.data.find(dia => dia.dia === diaDaSemanaMap[hojeIndex]);
-            if (diaAtual) {
-                (diaAtual.alunos || []).forEach(alunoAgendado => {
-                    if (!alunoAgendado.necessidade_relacionada) return;
-                    
-                    const alunoCompleto = todosAlunos.find(a => a.id === alunoAgendado.id);
-                    const idDaJuncao = relationLookupMap.get(`aluno${alunoAgendado.id}-nec${alunoAgendado.necessidade_relacionada.id}`);
-                    
-                    if(alunoCompleto && idDaJuncao && !alunosParaHoje.has(idDaJuncao)) {
-                        alunosParaHoje.set(idDaJuncao, {
-                            alunoId: alunoCompleto.id, nome: alunoCompleto.nome, foto: alunoCompleto.foto,
-                            turmas_id: alunoCompleto.turmas_id, necessidade: alunoAgendado.necessidade_relacionada.necessidade,
-                            alunosHasNecessidadesId: idDaJuncao,
-                        });
-                    }
+            const nomeDoDiaHoje = diasDaSemana[hojeIndex]; 
+            const cronogramaDeHoje = (cronogramaRes.data || []).find(dia => dia.dia === nomeDoDiaHoje);
+            let idsDeHoje = new Set();
+            if (cronogramaDeHoje && cronogramaDeHoje.alunos) {
+                cronogramaDeHoje.alunos.forEach(aluno => {
+                    if (aluno && aluno.id) idsDeHoje.add(aluno.id);
                 });
             }
-            
-            setAlunosComRestricao(Array.from(alunosParaHoje.values()));
+            setIdsAlunosNoCronograma(idsDeHoje);
 
         } catch (error) {
-            if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', 'Não foi possível carregar os dados.', 'error');
-        } finally { setIsLoading(false); }
-    };
-
-    useEffect(() => { fetchData(); }, []);
-
-    const totalContagem = useMemo(() => {
-        return Object.values(contagens).reduce((total, cont) => total + (parseInt(cont.qtd_contagem, 10) || 0), 0);
-    }, [contagens]);
-
-    const abrirLightbox = (aluno) => {
-        Swal.fire({
-            imageUrl: aluno.foto ? `${PUBLIC_STORAGE_URL}/storage/${aluno.foto}` : placeholderAvatar,
-            imageAlt: aluno.nome,
-            title: aluno.nome,
-            showConfirmButton: false,
-            background: 'rgba(0,0,0,0.8)',
-            backdrop: true,
-        });
-    };
-    
-    const handleOpenModal = async (turma) => {
-        let contagem = contagens[turma.id];
-
-        if (!contagem) {
-            try {
-                Swal.showLoading();
-                const novaContagem = await addContagem({ qtd_contagem: 0, turmas_id: turma.id });
-                if (!novaContagem || !novaContagem.id) throw new Error("API não retornou a nova contagem.");
-                contagem = novaContagem;
-                setContagens(prev => ({...prev, [turma.id]: contagem}));
-                Swal.close();
-            } catch (error) {
-                Swal.fire('Erro!', 'Não foi possível iniciar a contagem para esta turma.', 'error');
-                return;
+            console.error("Erro no carregamento de dados:", error);
+            if (!error.message.includes("Sessão expirada")) {
+                Swal.fire('Erro!', 'Não foi possível carregar os dados essenciais da página.', 'error');
             }
+        } finally {
+            if (showLoading) setLoading(false);
         }
-        
-        const alunosDaTurma = alunosComRestricao.filter(aluno => aluno.turmas_id === turma.id);
-        
-        let alunosConfirmadosMap = new Map();
-        try {
-            const contagemNesData = await getAlunosContagemNes(contagem.id);
-            (contagemNesData.data || []).forEach(item => {
-                alunosConfirmadosMap.set(item.alunos_has_necessidades_id, item.id);
-            });
-        } catch (e) { console.error("Não foi possível carregar alunos confirmados.", e); }
+    }, []);
 
-        const restricoesHtml = alunosDaTurma.length > 0
-            ? `<div class="container-restricoes">` +
-              alunosDaTurma.map(aluno => {
-                const isConfirmed = alunosConfirmadosMap.has(aluno.alunosHasNecessidadesId);
-                return `
-                    <div class="card-aluno ${isConfirmed ? 'verde' : ''}" id="card-aluno-${aluno.alunosHasNecessidadesId}">
-                        <img src="${aluno.foto ? `${PUBLIC_STORAGE_URL}/storage/${aluno.foto}` : placeholderAvatar}" alt="${aluno.nome}" class="foto-aluno" data-aluno-id="${aluno.alunoId}">
-                        <div class="info-aluno">
-                            <span>${aluno.nome}<br><small>${aluno.necessidade}</small></span>
-                            <button type="button" class="btn-toggle-status ${isConfirmed ? 'confirmado' : ''}" data-id="${aluno.alunosHasNecessidadesId}">
-                                ${isConfirmed ? 'Não' : 'Sim'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-              }).join('') + `</div>`
-            : '<p class="swal-no-restricoes">Nenhuma necessidade especial para esta turma hoje.</p>';
+    useEffect(() => {
+        carregarDados();
+    }, [carregarDados]);
+
+    // Cálculos derivados do estado
+    const totalGeral = useMemo(() => contagens.reduce((sum, c) => sum + Number(c?.qtd_contagem || 0), 0), [contagens]);
+    
+    // Esta função é inteligente para lidar com duplicatas (se existirem)
+    const getContagemDaTurma = useCallback((turmaId) => {
+        const contagensDaTurmaHoje = contagens.filter(c => c.turmas_id === turmaId && c.data_contagem === hoje);
+        if (contagensDaTurmaHoje.length === 0) return null;
+        if (contagensDaTurmaHoje.length === 1) return contagensDaTurmaHoje[0];
+
+        // Se houver duplicatas, prioriza a que tem filhos
+        const idsComFilhos = new Set(alunosNesDeHoje.map(nes => nes.contagem_id));
+        const contagemComFilhos = contagensDaTurmaHoje.find(c => idsComFilhos.has(c.id) || idsComFilhos.has(String(c.id)));
+
+        return contagemComFilhos || contagensDaTurmaHoje[0];
+
+    }, [contagens, hoje, alunosNesDeHoje]); 
+
+    // Função principal para abrir o modal
+    const abrirModalContagem = async (turma) => {
+        let contagemAtual = getContagemDaTurma(turma.id); // Variável LOCAL
+        const isCreatingContagem = !contagemAtual; 
+        const quantidadeInicial = isCreatingContagem ? 32 : contagemAtual.qtd_contagem;
 
         Swal.fire({
-            title: `Contagem - ${turma.nome_turma}`,
-            html: `
-              <div class="swal-qtd-control">
-                  <button id="swal-btn-minus" class="swal-qtd-button" type="button">-</button>
-                  <input id="swal-qtd" type="number" class="swal-qtd-input" value="${contagem.qtd_contagem}" min="0">
-                  <button id="swal-btn-plus" class="swal-qtd-button" type="button">+</button>
-              </div>
-              ${restricoesHtml}
-            `,
-            showCancelButton: false,
-            confirmButtonText: 'Salvar e Fechar',
-            didOpen: () => {
-                const qtdInput = document.getElementById('swal-qtd');
-                document.getElementById('swal-btn-minus').onclick = () => { qtdInput.value = Math.max(0, parseInt(qtdInput.value) - 1); };
-                document.getElementById('swal-btn-plus').onclick = () => { qtdInput.value = parseInt(qtdInput.value) + 1; };
+            title: 'Preparando Contagem...',
+            text: `Buscando dados para a turma ${turma.nome_turma}`,
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+        });
 
-                document.querySelectorAll('.btn-toggle-status').forEach(button => {
-                    button.onclick = async () => {
-                        const isCurrentlyConfirmed = button.classList.contains('confirmado');
-                        const alunoHasNecessidadeId = parseInt(button.dataset.id, 10);
-                        const card = document.getElementById(`card-aluno-${alunoHasNecessidadeId}`);
-                        
-                        button.disabled = true;
-
-                        try {
-                            if (isCurrentlyConfirmed) {
-                                const contagemNesId = alunosConfirmadosMap.get(alunoHasNecessidadeId);
-                                if (contagemNesId) {
-                                    await removeAlunoDaContagemNes(contagemNesId);
-                                    alunosConfirmadosMap.delete(alunoHasNecessidadeId);
-                                    button.classList.remove('confirmado');
-                                    card.classList.remove('verde');
-                                    button.textContent = 'Sim';
-                                }
-                            } else {
-                                const novoRegistro = await addAlunoNaContagemNes(alunoHasNecessidadeId);
-                                if (novoRegistro && novoRegistro.id) {
-                                    alunosConfirmadosMap.set(alunoHasNecessidadeId, novoRegistro.id);
-                                }
-                                button.classList.add('confirmado');
-                                card.classList.add('verde');
-                                button.textContent = 'Não';
-                            }
-                        } catch (err) {
-                            console.error("Falha ao atualizar status:", err);
-                        } finally {
-                            button.disabled = false;
+        try {
+            // 1. Filtrar alunos elegíveis para o modal (NAI/Cronograma)
+            const necessidadesComAlunos = await Promise.all(
+                necessidades.map(n => getNecessidadeComAlunos(n.id))
+            );
+            let alunosParaExibir = []; 
+            necessidadesComAlunos.forEach(nec => {
+                (nec.alunos || []).forEach(aluno => {
+                    // Este 'joinId' é o 'alunos_has_necessidades_id'
+                    const joinId = aluno.pivot?.id; 
+                    if (aluno.turmas_id === turma.id && joinId) {
+                        if (nec.necessidade.toUpperCase() === 'NAI' || idsAlunosNoCronograma.has(aluno.id)) {
+                            alunosParaExibir.push({
+                                ...aluno,
+                                necessidade_id: nec.id,
+                                necessidade_nome: nec.necessidade,
+                                alunos_has_necessidades_id: joinId 
+                            });
                         }
-                    };
+                    }
                 });
-                
-                document.querySelectorAll('.foto-aluno').forEach(foto => {
-                    foto.onclick = () => {
-                        const alunoId = parseInt(foto.dataset.alunoId, 10);
-                        const aluno = alunosDaTurma.find(a => a.alunoId === alunoId);
-                        if(aluno) abrirLightbox(aluno);
-                    };
-                });
-            },
-            preConfirm: () => {
-                return document.getElementById('swal-qtd').value;
-            }
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                const qtd_contagem = result.value;
+            });
+
+            // 2. Lógica de Criação Automática vs. Leitura do Estado Atual
+            let mapaAlunosAtivosModal = new Map(); 
+            let dadosNesParaRenderizar = [...alunosNesDeHoje];
+
+            // Se for a PRIMEIRA VEZ e houver alunos a exibir
+            if (isCreatingContagem && alunosParaExibir.length > 0) {
+                // a. Crie a contagem principal ANTES
+                 try {
+                    const novaContagemResponse = await addContagem({ quantidade: quantidadeInicial, turmaId: turma.id });
+                    contagemAtual = novaContagemResponse.data || novaContagemResponse; 
+                    if (!contagemAtual) throw new Error("Falha ao criar contagem principal inicial.");
+                    setContagens(prev => [...prev, contagemAtual]); 
+                } catch (err) {
+                    throw new Error(`Erro ao criar contagem principal: ${err.message}`);
+                }
+
+                // b. Crie todos os 'contagem_nes'
                 try {
-                    Swal.showLoading();
-                    await updateContagem(contagem.id, { qtd_contagem });
-                    await Swal.fire({icon: 'success', title: 'Sucesso!', text: 'Contagem salva!', timer: 1500, showConfirmButton: false});
-                    fetchData();
-                } catch (error) {
-                    if (error && !error.message.includes('Sessão expirada')) Swal.fire('Erro!', `Não foi possível salvar a contagem.`, 'error');
+                    // Pega os IDs (ahp_id) que já existem HOJE (conforme sua lógica)
+                    const nesExistentes = new Set(
+                        alunosNesDeHoje.map(nes => nes.aluno.id) 
+                    );
+                    const nesParaCriar = alunosParaExibir.filter(
+                        aluno => !nesExistentes.has(aluno.alunos_has_necessidades_id)
+                    );
+
+                    if (nesParaCriar.length > 0) {
+                        const promessasCriacao = nesParaCriar.map(aluno =>
+                            addAlunoNaContagemNes(contagemAtual.id, aluno.alunos_has_necessidades_id) 
+                        );
+                        await Promise.all(promessasCriacao);
+                    }
+                } catch (createError) {
+                    console.error("Erro na criação automática de NES:", createError);
+                }
+
+                // d. DEPOIS que tudo for criado, BUSQUE NOVAMENTE
+                try {
+                    const alunosNesRes = await getAlunosContagemNes(); // Re-busca a "verdade"
+                    dadosNesParaRenderizar = alunosNesRes.data || []; 
+                    setAlunosNesDeHoje(dadosNesParaRenderizar); 
+                } catch (fetchError) {
+                    console.error("Erro ao re-buscar NES:", fetchError);
+                    throw new Error(`Erro ao buscar dados pós-criação: ${fetchError.message}`);
                 }
             }
-        });
+            
+            // 3. Preencher o Mapa (Sempre acontece, seja criação ou edição)
+            // Esta é a lógica correta que você descobriu
+            dadosNesParaRenderizar.forEach(nes => {
+                // nes.aluno.id é o 'alunos_has_necessidades_id' (conforme sua info)
+                // nes.id é o ID da tabela 'contagem_nes' (para o delete)
+                if (nes.aluno && nes.aluno.id) {
+                    mapaAlunosAtivosModal.set(nes.aluno.id, nes.id);
+                }
+            });
+            // Agora o mapa está correto, e os botões ficarão verdes.
+
+            // 4. Montar e Exibir o Modal (COM AS NOVAS CLASSES CSS)
+            await Swal.fire({
+                 title: `Contagem - ${turma.nome_turma}`,
+                 html: `
+                   <div class="contador">
+                       <button id="menos" class="btn-contador" aria-label="Diminuir">-</button>
+                       
+                       <input type="number" id="contadorValor" class="contador-input" value="${quantidadeInicial}" min="0"/>
+                       
+                       <button id="mais" class="btn-contador" aria-label="Aumentar">+</button>
+                   </div>
+                   ${alunosParaExibir.length > 0 ? `
+                       <h3 class="titulo-nes">Necessidades Especiais</h3>
+                       <div class="lista-nes">
+                           ${necessidades.map(n => {
+                               const alunosDoGrupo = alunosParaExibir.filter(a => a.necessidade_id === n.id);
+                               if (alunosDoGrupo.length === 0) return '';
+                               return `
+                                   <div class="nes-group">
+                                       <h4>${n.necessidade}</h4>
+                                       ${alunosDoGrupo.map(a => `
+                                           
+                                           <div class="nes-item ${mapaAlunosAtivosModal.has(a.alunos_has_necessidades_id) ? 'ativo' : ''}" 
+                                                id="nes-item-${a.alunos_has_necessidades_id}">
+                                               <img src="${a.foto ? `${PUBLIC_STORAGE_URL}/${a.foto}` : placeholderAvatar}" alt="${a.nome}">
+                                               <span>${a.nome}</span>
+                                               <label class="switch">
+                                                   <input type="checkbox"
+                                                       data-aluno-nes-id="${a.alunos_has_necessidades_id}"
+                                                       
+                                                       ${mapaAlunosAtivosModal.has(a.alunos_has_necessidades_id) ? 'checked' : ''}
+                                                   >
+                                                   <span class="slider"></span>
+                                               </label>
+                                           </div>
+                                       `).join('')}
+                                   </div>
+                               `;
+                           }).join('')}
+                       </div>
+                   ` : '<p>Nenhum aluno com necessidades especiais para exibir hoje.</p>'}
+                 `,
+                 confirmButtonText: 'Salvar',
+                 confirmButtonColor: '#198754', // Mantém o verde para "Salvar"
+                 showCancelButton: true,
+                 cancelButtonText: 'Fechar',
+                 cancelButtonColor: '#dc3545', // Mantém o vermelho para "Fechar"
+                 reverseButtons: true,
+                 width: 600,
+                 didOpen: () => {
+                     const contadorInput = document.getElementById('contadorValor');
+                     // Os botões +/- agora são 'btn-contador'
+                     document.getElementById('menos').onclick = () => { contadorInput.value = Math.max(0, parseInt(contadorInput.value || '0') - 1); };
+                     document.getElementById('mais').onclick = () => { contadorInput.value = parseInt(contadorInput.value || '0') + 1; };
+
+                     // Listener para os toggles (lógica intacta)
+                     document.querySelectorAll('.nes-item input[type="checkbox"]').forEach(chk => {
+                         chk.addEventListener('change', async (e) => {
+                             const alunoNesId = parseInt(e.target.dataset.alunoNesId, 10);
+                             const itemElement = e.target.closest('.nes-item');
+
+                             // Garante que a contagem principal exista
+                             if (!contagemAtual) {
+                                 try {
+                                     const qtdAtual = parseInt(document.getElementById('contadorValor').value) || (isCreatingContagem ? 32 : 0);
+                                     const novaContagemResponse = await addContagem({ quantidade: qtdAtual, turmaId: turma.id });
+                                     contagemAtual = novaContagemResponse.data || novaContagemResponse;
+                                     if (!contagemAtual) throw new Error("Falha ao criar contagem de referência.");
+                                     setContagens(prev => [...prev, contagemAtual]);
+                                 } catch (err) {
+                                     Swal.showValidationMessage(`Erro ao criar contagem principal: ${err.message}`);
+                                     e.target.checked = !e.target.checked; return;
+                                 }
+                             }
+
+                             // Salva ou remove o registro NES em tempo real
+                             if (e.target.checked) {
+                                 // Como o mapa agora está correto, isso previne duplicatas
+                                 if (!mapaAlunosAtivosModal.has(alunoNesId)) { 
+                                     try {
+                                         const res = await addAlunoNaContagemNes(contagemAtual.id, alunoNesId);
+                                         // A API addAluno... deve retornar { id, aluno: { id } } ou similar
+                                         const novoRegistro = res.data || res;
+                                         const novoContagemNesId = novoRegistro.id;
+                                         const novoAlunoNesId = novoRegistro.aluno?.id || alunoNesId; // Garante
+
+                                         if (novoContagemNesId) {
+                                             mapaAlunosAtivosModal.set(novoAlunoNesId, novoContagemNesId); 
+                                             itemElement.classList.add('ativo');
+                                         } else { throw new Error("API não retornou ID ao criar NES."); }
+                                     } catch (err) {
+                                         console.error("Erro ao adicionar NES:", err);
+                                         Swal.showValidationMessage(`Erro: ${err.message}`);
+                                         e.target.checked = false; itemElement.classList.remove('ativo');
+                                     }
+                                 } else { 
+                                    itemElement.classList.add('ativo'); 
+                                 }
+                             } else {
+                                 // Remove o registro
+                                 const idParaRemover = mapaAlunosAtivosModal.get(alunoNesId);
+                                 if (idParaRemover) {
+                                     try {
+                                         await removeAlunoDaContagemNes(idParaRemover);
+                                         mapaAlunosAtivosModal.delete(alunoNesId); 
+                                         itemElement.classList.remove('ativo');
+                                     } catch (err) {
+                                         console.error("Erro ao remover NES:", err);
+                                         Swal.showValidationMessage(`Erro: ${err.message}`);
+                                         e.target.checked = true; itemElement.classList.add('ativo');
+                                     }
+                                 } else {
+                                      console.warn("Tentativa de remover NES não encontrado:", alunoNesId);
+                                      itemElement.classList.remove('ativo');
+                                 }
+                             }
+                         });
+                     });
+                 },
+                 
+                // CORREÇÃO DAS DUPLICATAS DA 'Contagem' ao Salvar
+                 preConfirm: () => {
+                     return {
+                         quantidadeFinal: parseInt(document.getElementById('contadorValor').value || '0', 10),
+                         contagemOriginal: contagemAtual // <-- USA A VARIÁVEL LOCAL
+                     }
+                 }
+            }).then(async (result) => {
+                 // Bloco executado quando o modal fecha (por Salvar ou Fechar)
+                 
+                if (result.isConfirmed) {
+                    const { quantidadeFinal, contagemOriginal } = result.value;
+                    try {
+                        if (contagemOriginal) { 
+                             if (contagemOriginal.qtd_contagem !== quantidadeFinal) {
+                                 await updateContagem(contagemOriginal.id, { quantidade: quantidadeFinal });
+                             }
+                        } else { 
+                             if (quantidadeFinal > 0 || (isCreatingContagem && quantidadeFinal === 32)) {
+                                 await addContagem({ quantidade: quantidadeFinal, turmaId: turma.id });
+                             }
+                        }
+                        Swal.fire('Sucesso', 'Contagem salva!', 'success');
+                    } catch (error) {
+                         Swal.fire('Erro!', `Não foi possível salvar o número da contagem. <br><small>${error.message}</small>`, 'error');
+                    }
+                }
+                
+                // Recarrega os dados ao fechar para garantir sincronia
+                carregarDados(false); 
+            });
+        } catch (error) {
+            console.error("Erro ao abrir modal:", error);
+            Swal.fire('Erro Fatal!', `Não foi possível processar a contagem. <br><small>${error.message}</small>`, 'error');
+             setLoading(false); 
+        }
     };
 
+    if (loading) {
+        return <div className="carregando"><div className="spinner"></div><p>Carregando dados...</p></div>;
+    }
+
     return (
-        <main className="contar">
-            <div className="buttons-container">
-                {isLoading ? <p style={{textAlign: 'center', gridColumn: '1 / -1'}}>Carregando turmas...</p> : (
-                    <>
-                        {turmas.map(turma => (
-                            <button 
-                                key={turma.id}
-                                className={`main-button ${contagens[turma.id] ? 'contado' : ''}`}
-                                onClick={() => handleOpenModal(turma)}
-                            >
-                                <i className='bi bi-people-fill'></i> 
-                                {turma.nome_turma}
-                            </button>
-                        ))}
-                        <div className="total-card">
-                            <span className="total-label">Total do Dia</span>
-                            <span className="total-value">{totalContagem}</span>
-                        </div>
-                    </>
-                )}
+        <section className="contagem-section">
+            <div className="total-geral">
+                <div>
+                    <i className="bi bi-people-fill"></i>
+                    <span>Total de Alunos Hoje:</span>
+                </div>
+                <strong>{totalGeral}</strong>
             </div>
-            <button className="back-button" onClick={() => navigate(-1)}>
-                <i className="bi bi-arrow-left"></i> Voltar
-            </button>
-        </main>
+            <div className="turmas-grid">
+                {turmas.map((turma) => {
+                    const contagem = getContagemDaTurma(turma.id);
+                    return (
+                        <button
+                            key={turma.id}
+                            className={`turma-card ${contagem ? 'tem-contagem' : 'sem-contagem'}`}
+                            onClick={() => abrirModalContagem(turma)}
+                        >
+                            <span className="turma-nome-display">{turma.nome_turma}</span>
+                            <span className="turma-contagem-display">
+                                {contagem ? `${contagem.qtd_contagem} alunos` : 'Fazer Contagem'}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+        </section>
     );
 };
 

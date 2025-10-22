@@ -18,7 +18,7 @@
 
 .cronograma-header h1 {
   font-size: 1.8rem;
-  color: #aa1919;
+  color: #333;
 }
 
 .cronograma-board-wrapper {
@@ -65,7 +65,7 @@
   overflow-y: auto;
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid #53090973;
+  border: 1px solid #eee;
 }
 
 .source-item {
@@ -106,20 +106,17 @@
 .day-column {
   flex: 0 0 300px;
   width: 300px;
-  background-color: #fafafa;
+  background-color: #f4f5f7;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   max-height: 100%;
-  overflow-x: auto;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.432);
-  border: 1px solid #7a0a0a71;
 }
 
 .day-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #7a0a0a;
+  color: #172b4d;
   padding: 15px;
   margin: 0;
   border-bottom: 1px solid #ddd;

@@ -8,7 +8,7 @@
     box-sizing: border-box;
     position: relative;
     min-width: 100vw;
-    margin-top: 11vh;
+    margin-top: 10vh;
     height: 80vh;
 }
 
@@ -152,7 +152,7 @@
 /* ---- ESTILO DO CARD UNIVERSAL DE ALUNO ---- */
 .aluno-card {
     background-color: #fff;
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid #e9ecef;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     display: flex;
@@ -221,6 +221,7 @@
     border-bottom-right-radius: 12px;
     margin-top: auto;
     width: 100%;
+
 }
 /* Regra para dividir em 2 colunas */
 .card-actions[data-button-count="2"] { grid-template-columns: repeat(2, 1fr); }
@@ -241,18 +242,23 @@
     gap: 8px;
     padding: 0 10px;
     width: 100%;
-    border-radius: 10px;
+
 }
 .card-actions button:hover { filter: brightness(0.9); }
 .card-actions button:disabled { background-color: #e9ecef; color: #adb5bd; cursor: not-allowed; }
 .card-actions button i { font-size: 1rem; }
 
 /* Cores específicas para cada tipo de botão */
-.action-button-card.add { background-color: #28a745; }
-.action-button-card.edit { background-color: #ffc107; color: #212529; }
-.action-button-card.delete { background-color: #dc3545; }
-.action-button-card.schedule { background-color: #17a2b8; }
-.action-button-card.remove { background-color: #6c757d; }
+.action-button-card.add { background-color: #ffffff;border-radius: 10px;
+color: #28a745; border: 1px solid #28a745;}
+.action-button-card.edit { background-color: #ffffff; color: #212529; border-radius: 10px;
+    color: #ffc107; border: 1px solid #ffc107;}
+.action-button-card.delete { background-color: #ffffff;border-radius: 10px; 
+    color: #dc3545; border: 1px solid #dc3545;}
+.action-button-card.schedule { background-color: #ffffff;border-radius: 10px;
+    color: #17a2b8; border: 1px solid #17a2b8; }
+.action-button-card.remove { background-color: #ffffff;border-radius: 10px; 
+    color: #dc3545; border: 1px solid #dc3545;}
 
 /* ---- COMPONENTES GENÉRICOS ---- */
 .action-button-pdf {
@@ -325,6 +331,9 @@
     display: flex; align-items: center; gap: 10px;
     font-size: 1.1rem; cursor: pointer;
 }
+
+
+
 .swal-checkbox-label input { width: 18px; height: 18px; }
 
 /* ---- RESPONSIVIDADE ---- */
@@ -355,4 +364,132 @@
     .grid-container-central {
         grid-template-columns: 1fr;
     }
+}
+
+/* ---- PAINEL CENTRAL (ALUNOS DA NECESSIDADE) - ALTERADO ---- */
+/* Garante que a grade do painel central tenha sempre 3 colunas. */
+.grid-container-central {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    padding: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* ---- ESTILO DO CARD UNIVERSAL DE ALUNO - ALTERADO ---- */
+/* Adiciona position: relative e overflow: hidden para controlar o efeito de hover. */
+.aluno-card {
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease; /* Transição mais suave */
+    margin-bottom: 12px;
+    position: relative; /* Essencial para o posicionamento dos botões */
+    overflow: hidden;   /* Essencial para esconder os botões e descrição */
+}
+
+.aluno-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+/* Reduz o padding para um visual mais compacto */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Reduz a fonte do nome para caber melhor */
+.card-name {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #343a40;
+}
+
+/* ---- DESCRIÇÃO OCULTA (HOVER) - NOVO / ALTERADO ---- */
+/* A descrição agora fica oculta por padrão e se expande com animação. */
+.card-body {
+    padding: 12px;
+    text-align: left;
+    background-color: #fff;
+    
+    /* Lógica para esconder/mostrar */
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+/* Quando o mouse passa sobre o card, a descrição aparece. */
+.aluno-card:hover .card-body {
+    max-height: 200px; /* Altura máxima que a descrição pode ocupar */
+    opacity: 1;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-top: 1px solid #e9ecef;
+}
+
+.card-body .card-description-text {
+    font-size: 0.85rem;
+    color: #495057;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ---- BOTÕES DE AÇÃO OCULTOS (HOVER) - ALTERADO ---- */
+/* Os botões agora ficam posicionados fora da tela e aparecem no hover. */
+.card-actions { 
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: grid;
+    gap: 1px;
+    background-color: rgba(221, 221, 221, 0.9);
+    border-top: 1px solid rgba(0,0,0,0.1);
+    
+    /* Animação para aparecer de baixo para cima */
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    border-radius: 10px;
+}
+
+/* Quando o mouse passa sobre o card, os botões aparecem. */
+.aluno-card:hover .card-actions {
+    transform: translateY(0);
+    opacity: 1;
+    border-radius: 10px;
+}
+
+/* As regras para dividir os botões continuam as mesmas */
+.card-actions[data-button-count="2"] { grid-template-columns: repeat(2, 1fr); }
+.card-actions[data-button-count="3"] { grid-template-columns: repeat(3, 1fr); }
+
+/* O estilo dos botões em si continua o mesmo */
+.card-actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    color: white;
+    transition: filter 0.2s ease;
+    gap: 8px;
+    padding: 0 10px;
+    border-radius: 10px;
 }

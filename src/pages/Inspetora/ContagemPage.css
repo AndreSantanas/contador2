@@ -1,289 +1,318 @@
-/* Container principal da página */
-.contar {
+/* =================================
+   DESIGN DASHBOARD - ContagemPage.css (Revisado para Padrão de Cores)
+   =================================
+*/
+
+/* --- Variáveis de Tema (Mantendo Seu Padrão) --- */
+:root {
+  --cor-primaria: #8B0000; /* Vermelho escuro */
+  --cor-completo: #111; /* Preto */
+  --cor-texto-claro: #fff; /* Branco */
+  --cor-fundo-app: #f7f7f7; /* Cinza claro para fundo */
+  --cor-fundo-card: #fff; /* Branco para cards */
+  --cor-borda: #e0e0e0; /* Borda sutil */
+  --cor-sucesso: #28a745; /* Verde para sucesso */
+  --tamanho-toque-min: 44px; /* Acessibilidade */
+  --raio-borda: 12px; /* Bordas arredondadas leves */
+  --transicao-padrao: all 0.2s ease; /* Transições suaves */
+}
+
+/* --- Base e Layout Principal --- */
+.contagem-section {
+    background: var(--cor-fundo-app);
+    padding: 25px;
+    border-radius: var(--raio-borda);
+    max-width: 1100px;
+    margin: 30px auto;
+    border: 1px solid var(--cor-borda);
+    max-height: 85vh;
+    margin-top: 10vh;
+}
+
+.total-geral {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: #333; /* Preto para texto */
+    background: var(--cor-fundo-card);
+    padding: 15px 25px;
+    border-radius: var(--raio-borda);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Sombra sutil */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.total-geral i {
+    color: var(--cor-primaria);
+    margin-right: 15px;
+    font-size: 1.5rem;
+}
+
+/* --- Grid das Turmas --- */
+.turmas-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Padrão: uma coluna */
+    gap: 20px;
+    max-height: 68vh;
+    min-width: 68vw;
+    overflow: auto;
+}
+
+.turma-card {
+    background: var(--cor-primaria); /* Vermelho escuro para "sem contagem" */
+    color: var(--cor-texto-claro);
+    border-radius: var(--raio-borda);
+    border: none;
+    cursor: pointer;
+    transition: var(--transicao-padrao);
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-    background-color: #f4f7f6; /* Fundo suave */
-}
-
-/* Container dos botões com scroll */
-.buttons-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Duas colunas por padrão */
-    gap: 15px;
-    width: 100%;
-    max-width: 800px;
-    max-height: 70vh; /* Altura máxima para ativar o scroll */
-    padding: 20px;
-    overflow-y: auto; /* Scroll vertical */
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-/* Botão principal de turma */
-.main-button {
-    background: #8B0000;
-    color: white;
-    font-size: 1rem;
-    padding: 15px;
-    border: none;
-    border-radius: 8px;
-    display: flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 600;
-    gap: 8px;
-    min-height: 70px;
-}
-.main-button:hover {
-    background: #a52a2a;
-    transform: translateY(-2px);
-}
-.main-button.contado {
-    background: #343a40; /* Preto para turmas já contadas */
-}
-.main-button.contado:hover {
-    background: #495057;
+    min-height: 110px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    /* Acessibilidade */
+    role: "button";
+    tab-index: 0;
 }
 
-/* Cartão de Total */
-.total-card {
-    grid-column: 1 / -1; /* Ocupa a largura total da grid */
-    background-color: #f8f9fa;
-    color: #28a745;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.turma-card.tem-contagem {
+    background: var(--cor-completo); /* Preto para "com contagem" */
 }
-.total-label {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #343a40;
+
+.turma-card:hover {
+    transform: translateY(-3px); /* Elevação sutil */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-.total-value {
-    font-size: 1.8rem;
+
+.turma-card:focus {
+    outline: 2px solid var(--cor-primaria);
+}
+
+.turma-nome-display {
+    font-size: 1.2rem;
     font-weight: bold;
+    text-align: center; /* Centralizado */
+    margin-bottom: 10px;
 }
 
-/* Botão Voltar */
-.back-button {
-    background: #6c757d;
-    color: white;
+.turma-contagem-display {
     font-size: 1rem;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 20px;
-}
-.back-button:hover {
-    background-color: #5a6268;
-}
-
-
-/* --- ESTILOS DO MODAL --- */
-.swal-qtd-control {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 25px;
-}
-.swal-qtd-button {
-    width: 40px;
-    height: 40px;
-    font-size: 1.5rem;
-    border-radius: 50%;
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
-    cursor: pointer;
-}
-.swal-qtd-input {
-    width: 80px;
     text-align: center;
+    opacity: 0.9;
+}
+
+/* --- Modal e Conteúdo Interno --- */
+.swal2-popup { border-radius: 15px !important; }
+
+.contador { display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
+
+.btn-contador {
+    background: var(--cor-primaria);
+    color: var(--cor-texto-claro);
+    border: none;
+    font-size: 1.5rem;
+    width: var(--tamanho-toque-min);
+    height: var(--tamanho-toque-min);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transicao-padrao);
+    line-height: var(--tamanho-toque-min);
+    padding: 0;
+    /* Acessibilidade */
+    aria-label: "Botão do contador";
+}
+
+.btn-contador:hover,
+.btn-contador:focus {
+    background: #a10000; /* Hover sutil */
+    outline: 2px solid var(--cor-texto-claro);
+}
+
+.contador-input {
     font-size: 2rem;
     font-weight: bold;
-    border: none;
-    border-bottom: 2px solid #333;
-}
-/* Remove as setas do input number */
-.swal-qtd-input::-webkit-outer-spin-button,
-.swal-qtd-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-.swal-qtd-input[type=number] {
-    -moz-appearance: textfield;
-}
-
-/* Container das Restrições */
-.container-restricoes {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-    max-height: 250px;
-    overflow-y: auto;
+    text-align: center;
+    width: 80px;
+    margin: 0 15px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 5px;
     padding: 5px;
+    box-sizing: border-box;
+    background: var(--cor-fundo-card);
+    color: #333;
 }
 
-/* Card do Aluno */
-.card-aluno {
+/* Remove setas padrão */
+.contador-input::-webkit-outer-spin-button,
+.contador-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.contador-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.titulo-nes { 
+    text-align: left; 
+    margin-top: 15px; 
+    font-size: 1.3rem; 
+    color: #333; 
+    border-bottom: 2px solid #eee; 
+    padding-bottom: 5px;
+}
+
+.lista-nes { 
+    max-height: 350px; 
+    overflow-y: auto; 
+    padding: 10px 5px; 
+}
+.lista-nes::-webkit-scrollbar { 
+    width: 8px; 
+}
+.lista-nes::-webkit-scrollbar-thumb { 
+    background: var(--cor-primaria); 
+    border-radius: 8px; 
+}
+
+.nes-group { 
+    margin-bottom: 15px; 
+}
+.nes-group h4 { 
+    margin: 10px 0 8px 0; 
+    color: #111; 
+    font-weight: bold; 
+}
+
+.nes-item {
+    background: var(--cor-fundo-card);
+    border-radius: 10px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
-    background: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #dee2e6;
-    transition: all 0.2s ease;
-}
-.card-aluno.verde {
-    border-color: #28a745;
-    background-color: #e9f5ec;
-}
-.card-aluno.vermelho {
-    border-color: #dc3545;
-    background-color: #fce8e8;
+    gap: 10px;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--cor-borda);
+    transition: var(--transicao-padrao);
+    cursor: pointer;
+    min-height: var(--tamanho-toque-min);
+    /* Acessibilidade */
+    role: "button";
+    tab-index: 0;
 }
 
-.foto-aluno {
-    width: 45px;
-    height: 45px;
+.nes-item:focus {
+    outline: 2px solid var(--cor-primaria);
+}
+
+.nes-item.ativo {
+    background-color: #d1e7dd;
+    border-left-color: var(--cor-sucesso);
+}
+
+.nes-item img {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 12px;
-    cursor: pointer;
 }
 
-.info-aluno {
-    flex-grow: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
+/* Switch */
+.switch { 
+    position: relative; 
+    display: inline-block; 
+    width: 44px; 
+    height: 24px; 
+    margin-left: auto; 
 }
-.info-aluno span {
-    font-weight: 600;
+.switch input { 
+    opacity: 0; 
+    width: 0; 
+    height: 0; 
 }
-.info-aluno small {
-    display: block;
-    font-weight: 400;
-    color: #6c757d;
-    font-size: 0.8rem;
+.slider { 
+    position: absolute; 
+    cursor: pointer; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    background-color: #ccc; 
+    transition: .4s; 
+    border-radius: 24px; 
+}
+.slider:before { 
+    position: absolute; 
+    content: ""; 
+    height: 18px; 
+    width: 18px; 
+    left: 3px; 
+    bottom: 3px; 
+    background-color: white; 
+    transition: .4s; 
+    border-radius: 50%; 
+}
+input:checked + .slider { 
+    background-color: var(--cor-sucesso); 
+}
+input:checked + .slider:before { 
+    transform: translateX(20px); 
 }
 
-.botoes-status {
-    display: flex;
-    gap: 8px;
+/* --- Loading Spinner --- */
+.carregando { 
+    text-align: center; 
+    padding: 50px; 
 }
-.botoes-status .btn-status {
-    font-size: 0.9rem;
-    padding: 6px 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 600;
-    color: white;
+.spinner { 
+    width: 50px; 
+    height: 50px; 
+    border: 5px solid #ddd; 
+    border-top: 5px solid var(--cor-primaria); 
+    border-radius: 50%; 
+    animation: spin 1s linear infinite; 
+    margin: 0 auto 10px; 
 }
-.btn-status.btn-verde {
-    background-color: #28a745;
-}
-.btn-status.btn-vermelho {
-    background-color: #dc3545;
+@keyframes spin { 
+    to { transform: rotate(360deg); } 
 }
 
-
-/* --- RESPONSIVIDADE --- */
-@media (max-width: 768px) {
-    .contar {
-        height: auto;
-        justify-content: flex-start;
-        padding: 10px;
+/* --- Responsividade --- */
+@media (max-width: 768px) { /* Celular: uma coluna */
+    .contagem-section {
+        padding: 15px;
+        margin: 20px auto;
+        max-height: 90vh;
     }
-    .buttons-container {
-        grid-template-columns: 1fr; /* Apenas uma coluna no celular */
-        max-width: 100%;
-        min-width: unset;
-        max-height: calc(100vh - 120px); /* Altura dinâmica */
-        box-shadow: none;
-        border: 1px solid #eee;
+    .total-geral {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 10px 15px;
     }
-    .back-button {
-        width: 100%;
+    .turmas-grid {
+        grid-template-columns: 1fr; /* Uma coluna */
+        gap: 15px;
     }
-    .swal2-popup {
-        width: 95vw !important;
+    .turma-card {
+        min-height: 100px;
+        padding: 15px;
+    }
+    .btn-contador {
+        width: 40px; /* Mais fino em mobile */
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    .contador-input {
+        width: 60px;
+        font-size: 1.5rem;
     }
 }
 
-/* ... (todo o CSS anterior) ... */
-
-/* ESTILO PARA O NOVO BOTÃO DE ALTERNÂNCIA (Sim/Não) */
-.btn-toggle-status {
-    font-size: 0.9rem;
-    padding: 8px 16px;
-    border: 2px solid #dc3545; /* Vermelho por padrão */
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 600;
-    color: #dc3545;
-    background-color: #fff;
-    transition: all 0.2s ease;
-    min-width: 70px;
-}
-.btn-toggle-status.confirmado {
-    background-color: #28a745; /* Verde quando confirmado */
-    border-color: #28a745;
-    color: white;
-}
-.btn-toggle-status:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Esconde os botões antigos se ainda existirem */
-.botoes-status {
-    display: none;
-}
-
-
-/* ESTILO PARA O NOVO BOTÃO DE ALTERNÂNCIA (Sim/Não) */
-.btn-toggle-status {
-    font-size: 0.9rem;
-    padding: 8px 16px;
-    border: 2px solid #28a745; /* Verde por padrão (para a ação 'Sim') */
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 600;
-    color: #28a745;
-    background-color: #fff;
-    transition: all 0.2s ease;
-    min-width: 70px;
-    text-align: center;
-}
-.btn-toggle-status.confirmado {
-    background-color: #dc3545; /* Vermelho quando confirmado (para a ação 'Não') */
-    border-color: #dc3545;
-    color: white;
-}
-.btn-toggle-status:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Garante que os botões antigos não apareçam */
-.botoes-status {
-    display: none;
+@media (min-width: 769px) { /* Computador: duas colunas */
+    .turmas-grid {
+        grid-template-columns: repeat(2, 1fr); /* Exatamente duas colunas */
+    }
 }

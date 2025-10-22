@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2/dist/sweetalert2.all.min.js';
 import { getTurmas, addTurma, updateTurma, deleteTurma, getCategorias, addCategoria, updateCategoria, deleteCategoria } from '../../services/api';
+import BackButton from '../../components/common/BackButton/BackButton';
 import './CategoriasPage.css';
 
 // Função para escolher a cor do badge de forma consistente
@@ -237,9 +238,10 @@ const CategoriasPage = () => {
             <div className="panel-central panel-turmas">
                 <div className="panel-header">
                     <h3>{nomeDaVisao}</h3>
-                    <button className="action-button add-button" onClick={handleAddTurma}>
-                        <i className="bi bi-plus"></i> Adicionar Turma
-                    </button>
+                    {/* ========================================================= */}
+                    {/* CORREÇÃO APLICADA AQUI 👇                                */}
+                    {/* ========================================================= */}
+                    <button className="add-button-small" onClick={handleAddTurma} title="Criar Nova Turma">+</button>
                 </div>
                 <div className="table-wrapper-turmas">
                     <table className="turmas-table">

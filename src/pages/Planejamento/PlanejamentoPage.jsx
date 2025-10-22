@@ -58,8 +58,8 @@ const AlunoCard = ({ aluno, type, turmasMap, onAdd, onEdit, onDelete, onSchedule
                 </>
             ) : (
                 <>
-                    <button className="action-button-card schedule" onClick={onSchedule}><i className="bi bi-calendar-week"></i> Agendar</button>
-                    <button className="action-button-card remove" onClick={onRemove}><i className="bi bi-x-lg"></i> Remover</button>
+                    <button className="action-button-card schedule" onClick={onSchedule} title="Agendar Dia"><i className="bi bi-calendar-week"></i></button>
+                    <button className="action-button-card remove" onClick={onRemove} title="Deletar junção"><i className="bi bi-trash-fill"></i></button>
                 </>
             )}
         </div>

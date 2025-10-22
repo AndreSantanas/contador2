@@ -116,10 +116,10 @@
 }
 .action-button:hover { transform: translateY(-2px); }
 
-.add-button { background-color: #28a745; }
+.add-button { background-color: #ffffff; color: #28a745; border: 1px solid #28a745 ;}
 .add-button:hover { background-color: #218838; }
 
-.edit-button { background-color: #ffc107; color: #212529; }
+.edit-button { background-color: #ffffff; color: #ffc107; border: 1px solid #ffc107 ; }
 .edit-button:hover { background-color: #e0a800; }
 
 .delete-button { background-color: #dc3545; }
