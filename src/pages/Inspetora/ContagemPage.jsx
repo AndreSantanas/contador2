@@ -71,7 +71,12 @@ const ContagemPage = () => {
     }, [carregarDados]);
 
     // Cálculos derivados do estado
-    const totalGeral = useMemo(() => contagens.reduce((sum, c) => sum + Number(c?.qtd_contagem || 0), 0), [contagens]);
+    const totalGeral = useMemo(() => 
+        contagens
+            .filter(c => c.data_contagem === hoje) // <-- FILTRA APENAS AS CONTAGENS DE HOJE
+            .reduce((sum, c) => sum + Number(c?.qtd_contagem || 0), 0), 
+        [contagens, hoje] // Adiciona 'hoje' como dependência
+    );
     
     // Esta função é inteligente para lidar com duplicatas (se existirem)
     const getContagemDaTurma = useCallback((turmaId) => {
