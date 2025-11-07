@@ -11,7 +11,7 @@ const botoesConfig = {
   ],
   nutri: [
     { texto: 'Controle de Produção', icone: 'bi bi-graph-up', rota: '/nutri/controle-producao' },
-    { texto: 'Contagem Geral', icone: 'bi bi-list-check', rota: '/contagem-geral' },
+    { texto: 'Contagem Geral', icone: 'bi bi-calendar-check', rota: '/nutri/relatorio-geral' },
     { texto: 'Relatório Personalizado', icone: 'bi bi-file-earmark-text-fill', rota: '/relatorio-personalizado' },
     { texto: 'Cardápio', icone: 'bi bi-journal-text', rota: '/cardapio' },
     { texto: 'Chat', icone: 'bi bi-chat-dots-fill', rota: '/chat' },

@@ -119,7 +119,11 @@ export const updateContagem = (id, data) => {
 };
 
 // --- CONTAGEM NECESSIDADES (NES) ---
-export const getAlunosContagemNes = () => apiFetch('/contagem-nes');
+export const getAlunosContagemNes = () => {
+      const hoje = new Date().toISOString().slice(0, 10);
+
+    return apiFetch(`/contagem-nes?data=${hoje}`);
+};
 export const addAlunoNaContagemNes = (contagemId, alunoHasNecessidadeId) => {
     return apiFetch(`/contagem-nes`, {
         method: 'POST',
@@ -131,4 +135,26 @@ export const addAlunoNaContagemNes = (contagemId, alunoHasNecessidadeId) => {
 };
 export const removeAlunoDaContagemNes = (contagemNesId) => {
     return apiFetch(`/contagem-nes/${contagemNesId}`, { method: 'DELETE' });
+};
+
+// NOVA: Busca os dados de contagem agrupados por categoria e turma
+export const getContagensDashboard = () => apiFetch('/contagens/dashboard');
+
+
+
+
+
+export const getContagensPorRange = (dataInicio, dataFim) => {
+    // Esta provavelmente já está correta
+    return apiFetch(`/contagens?data_inicio=${dataInicio}&data_fim=${dataFim}`);
+};
+
+export const getDashboardPorData = (data) => {
+    // VERIFIQUE SE ESTÁ ASSIM, COM '?data=${data}' no final
+    return apiFetch(`/contagens/dashboard?data=${data}`); 
+};
+
+export const getAlunosNesPorData = (data) => {
+    // VERIFIQUE SE ESTÁ ASSIM, COM '?data=${data}' no final
+    return apiFetch(`/contagem-nes?data=${data}`); 
 };

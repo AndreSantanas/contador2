@@ -1,0 +1,20 @@
+/* /src/components/ContagemGeral/ReportView.css */
+
+/* Remove o grid antigo e cria o novo layout de 3 colunas */
+.report-main-grid-v2 {
+    display: grid;
+    /* Coluna 1 (Tipos) | Coluna 2 (Preview) | Coluna 3 (Filtros) */
+    grid-template-columns: 14vw 1fr 300px;
+    gap: 1.25rem; /* 20px */
+    width: 100%;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+/* Coluna 2: Área de Preview (Centro) */
+.report-preview-area {
+    background-color: #f0f2f5; /* Fundo mais escuro */
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-y: auto; /* Scroll para a área de preview */
+}

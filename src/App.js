@@ -18,6 +18,10 @@ import PlanejamentoPage from './pages/Planejamento/PlanejamentoPage';
 import NaiPage from './pages/GerenciarNai/NaiPage';
 import ContagemPage from './pages/Inspetora/ContagemPage';
 
+// ================== ADIÇÃO 1: Importar a nova página ==================
+import ContagemGeralPage from './pages/ContagemGeral/ContagemGeralPage';
+// ======================================================================
+
 const roleMap = { '1': 'inspetora', '2': 'nutri' };
 
 const PrivateRoute = ({ children, requiredRole }) => {
@@ -57,6 +61,11 @@ function App() {
         
         {/* ROTAS DA NUTRICIONISTA */}
         <Route path="/nutri/dashboard" element={ <PrivateRoute requiredRole="nutri"><MainLayout userRole="nutri"><DashboardNutri /></MainLayout></PrivateRoute> } />
+        
+        {/* ================== ADIÇÃO 2: Adicionar a nova rota ================== */}
+        <Route path="/nutri/relatorio-geral" element={ <PrivateRoute requiredRole="nutri"><MainLayout userRole="nutri"><ContagemGeralPage /></MainLayout></PrivateRoute> } />
+        {/* ====================================================================== */}
+        
         <Route path="/nutri/inicio" element={ <PrivateRoute requiredRole="nutri"><MainLayout userRole="nutri"><InicioPage userRole="nutri" /></MainLayout></PrivateRoute> } />
         <Route path="/nutri/controle-producao" element={ <PrivateRoute requiredRole="nutri"><MainLayout userRole="nutri"><ControleProducaoPage /></MainLayout></PrivateRoute> } />
         <Route path="/nutri/gerenciar" element={ <PrivateRoute requiredRole="nutri"><MainLayout userRole="nutri"><OpcoesPage /></MainLayout></PrivateRoute> } />
